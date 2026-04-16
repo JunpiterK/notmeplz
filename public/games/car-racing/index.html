@@ -3549,6 +3549,27 @@ function updatePlayers(dt){
             while(angleDiff<-Math.PI)angleDiff+=Math.PI*2;
             car.displayAngle+=angleDiff*smoothFactor;
         }
+        /* ========== CLAMP displayX/displayY to track boundary ========== */
+        if(!car.finished){
+            const ci=Math.max(0,Math.min(Math.floor(car.progress),track.length-2));
+            const ni=Math.min(ci+1,track.length-1);
+            const fr=car.progress-ci;
+            const tp=track[ci],tn=track[ni];
+            if(tp&&tn){
+                const bx=lerp(tp.x,tn.x,fr),by=lerp(tp.y,tn.y,fr);
+                const ang=Math.atan2(tn.y-tp.y,tn.x-tp.x);
+                const perp=ang+Math.PI/2;
+                const perpNx=Math.cos(perp),perpNy=Math.sin(perp);
+                /* Project displayX/displayY onto perpendicular to measure offset */
+                const dOffX=car.displayX-bx,dOffY=car.displayY-by;
+                const dispOffset=dOffX*perpNx+dOffY*perpNy;
+                if(Math.abs(dispOffset)>GUARDRAIL_LIMIT){
+                    const clamped=clamp(dispOffset,-GUARDRAIL_LIMIT,GUARDRAIL_LIMIT);
+                    car.displayX=bx+perpNx*clamped;
+                    car.displayY=by+perpNy*clamped;
+                }
+            }
+        }
     });
 
     /* Item box respawn */
