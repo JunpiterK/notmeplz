@@ -421,12 +421,16 @@ function updateBalls(dt){
             b.vy+=(Math.random()-0.5)*350*dt;
         }
 
-        // 5) Z-axis (depth) simulation — balls move front/back
-        b.vz+=(Math.sin(t*2.3+seed*0.7)-0.1)*4*dt;
-        b.vz*=0.97;// z friction
+        // 5) Z-axis (depth) — balls constantly shuffle front/back
+        //    Collisions and turbulence push balls between layers
+        b.vz+=(Math.sin(t*3.5+seed*0.7))*6*dt;// oscillate
+        b.vz+=(Math.random()-.5)*8*dt;// random z kicks
+        // Bursts also affect z
+        if(burstActive)b.vz+=(Math.sin(burstCycle*2.1+seed))*10*dt;
+        b.vz*=0.94;// z friction
         b.z+=b.vz*dt;
-        if(b.z>1){b.z=1;b.vz*=-0.6}
-        if(b.z<-1){b.z=-1;b.vz*=-0.6}
+        if(b.z>1){b.z=1;b.vz*=-0.7}
+        if(b.z<-1){b.z=-1;b.vz*=-0.7}
 
         // 6) Anti-wall-hugging
         if(normR>0.65){
@@ -713,17 +717,19 @@ function loop(ts){
     drawMachine();
     updateBalls(dt);
 
-    // Draw balls in machine (clip to globe) — sort by z for 3D depth
+    // Draw balls in machine (clip to globe)
+    // Sort by z: back balls drawn first, front balls drawn LAST (on top = overlap)
     ctx.save();
     ctx.beginPath();ctx.arc(machineX,machineY,machineR-2,0,Math.PI*2);ctx.clip();
-    // Sort: back balls (z=-1) first, front balls (z=1) last
     const sortedBalls=[...balls].filter(b=>!b.drawn).sort((a,b)=>(a.z||0)-(b.z||0));
     for(const b of sortedBalls){
-        const z=b.z||0;// -1=back, 0=middle, 1=front
-        const scale=0.7+0.3*(z+1)/2;// 0.7 (back) to 1.0 (front)
-        const alpha=0.5+0.5*(z+1)/2;// 0.5 (back) to 1.0 (front)
+        const z=b.z||0;// -1=back, 1=front
+        // Size: very subtle difference (0.92 to 1.0) — globe isn't deep
+        const scale=0.92+0.08*(z+1)/2;
+        // Brightness: back balls slightly darker (shadow of other balls)
+        const dimFactor=0.7+0.3*(z+1)/2;// 0.7=back, 1.0=front
         ctx.save();
-        ctx.globalAlpha=alpha;
+        ctx.globalAlpha=dimFactor;
         drawBall(b.x,b.y,b.r*scale,b.color,b.label);
         ctx.restore();
     }
