@@ -4,7 +4,7 @@
   - Images/Audio/Fonts: Cache-first (fast load, update in background)
   - Version bump CACHE_VERSION on every deploy to purge old caches
 */
-const CACHE_VERSION = 9;
+const CACHE_VERSION = 10;
 const CACHE_NAME = 'notmeplz-v' + CACHE_VERSION;
 
 const PRECACHE = [

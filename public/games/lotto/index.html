@@ -227,13 +227,13 @@ function genericColor(n){return BALL_COLORS[(n-1)%BALL_COLORS.length]}
 
 const LOTTO_PRESETS=[
     {id:'kr',flag:'🇰🇷',name:'Lotto 6/45',start:1,end:45,draw:6,mainColorFn:krColor,langs:['ko']},
-    {id:'us',flag:'🇺🇸',name:'Powerball',start:1,end:69,draw:5,mainColorFn:usColor,mainTextDark:true,bonus:{start:1,end:26,draw:1,label:'Powerball',color:'#E22D36'},langs:['en']},
+    {id:'us',flag:'🇺🇸',name:'Powerball',start:1,end:69,draw:5,mainColorFn:usColor,mainTextDark:true,bonus:{start:1,end:26,draw:1,label:'Powerball',color:'#E22D36'},separatePool:true,langs:['en']},
     {id:'gb',flag:'🇬🇧',name:'UK Lotto',start:1,end:59,draw:6,mainColorFn:gbColor,langs:['gb']},
     {id:'jp',flag:'🇯🇵',name:'Loto 6',start:1,end:43,draw:6,mainColorFn:jpColor,langs:['ja']},
-    {id:'cn',flag:'🇨🇳',name:'双色球',start:1,end:33,draw:6,mainColorFn:cnColor,bonus:{start:1,end:16,draw:1,label:'蓝球',color:'#1A56DB'},langs:['zh']},
+    {id:'cn',flag:'🇨🇳',name:'双色球',start:1,end:33,draw:6,mainColorFn:cnColor,bonus:{start:1,end:16,draw:1,label:'蓝球',color:'#1A56DB'},separatePool:true,langs:['zh']},
     {id:'es',flag:'🇪🇸',name:'La Primitiva',start:1,end:49,draw:6,mainColorFn:genericColor,langs:['es']},
-    {id:'de',flag:'🇩🇪',name:'Lotto 6/49',start:1,end:49,draw:6,mainColorFn:genericColor,bonus:{start:0,end:9,draw:1,label:'Superzahl',color:'#FFD700'},langs:['de']},
-    {id:'fr',flag:'🇫🇷',name:'Loto',start:1,end:49,draw:5,mainColorFn:()=>'#0055A4',bonus:{start:1,end:10,draw:1,label:'N° Chance',color:'#E74C3C'},langs:['fr']},
+    {id:'de',flag:'🇩🇪',name:'Lotto 6/49',start:1,end:49,draw:6,mainColorFn:genericColor,bonus:{start:0,end:9,draw:1,label:'Superzahl',color:'#FFD700'},separatePool:true,langs:['de']},
+    {id:'fr',flag:'🇫🇷',name:'Loto',start:1,end:49,draw:5,mainColorFn:()=>'#0055A4',bonus:{start:1,end:10,draw:1,label:'N° Chance',color:'#E74C3C'},separatePool:true,langs:['fr']},
     {id:'br',flag:'🇧🇷',name:'Mega-Sena',start:1,end:60,draw:6,mainColorFn:()=>'#009739',langs:['pt']},
     {id:'ru',flag:'🇷🇺',name:'Гослото 6/45',start:1,end:45,draw:6,mainColorFn:genericColor,langs:['ru']},
     {id:'tr',flag:'🇹🇷',name:'Sayısal Loto',start:1,end:49,draw:6,mainColorFn:genericColor,langs:['tr']},
@@ -727,7 +727,7 @@ function startLottoDraw(){
     drawnResults=[];drawnBalls=[];
 
     // Check if this is a separate-pool preset (like China 双色球)
-    const isSeparatePool=activePreset&&activePreset.id==='cn'&&bonusConfig;
+    const isSeparatePool=activePreset&&activePreset.separatePool&&bonusConfig;
 
     if(isSeparatePool){
         // PHASE 1: Load main (red) balls only
