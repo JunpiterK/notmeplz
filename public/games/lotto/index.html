@@ -429,35 +429,34 @@ function applyWindForces(){
         const seed=b.label*7.13;
         const mass=b.body.mass;
 
-        // === JET 1: Center bottom — straight up ===
-        // Strongest for balls directly above, weaker on sides
+        // === JET 1: Center bottom — straight up (moderate) ===
         const centerDist=Math.abs(horizPos);
-        const jet1=Math.max(0,vertPos+0.3)*(1-centerDist*0.5)*0.04*jet1Str*ramp;
+        const jet1=Math.max(0,vertPos+0.3)*(1-centerDist*0.5)*0.025*jet1Str*ramp;
         Body.applyForce(b.body,pos,{x:0,y:-jet1});
 
-        // === JET 2: Left side — up and right ===
+        // === JET 2: Left side — up and right (gentle) ===
         const nearLeft=Math.max(0,-horizPos)*Math.max(0,vertPos+0.2);
-        const jet2=nearLeft*0.03*jet2Str*ramp;
-        Body.applyForce(b.body,pos,{x:jet2*0.7,y:-jet2});
+        const jet2=nearLeft*0.018*jet2Str*ramp;
+        Body.applyForce(b.body,pos,{x:jet2*0.6,y:-jet2});
 
-        // === JET 3: Right side — up and left ===
+        // === JET 3: Right side — up and left (gentle) ===
         const nearRight=Math.max(0,horizPos)*Math.max(0,vertPos+0.2);
-        const jet3=nearRight*0.03*jet3Str*ramp;
-        Body.applyForce(b.body,pos,{x:-jet3*0.7,y:-jet3});
+        const jet3=nearRight*0.018*jet3Str*ramp;
+        Body.applyForce(b.body,pos,{x:-jet3*0.6,y:-jet3});
 
-        // === Per-ball random turbulence (each ball unique) ===
-        const turbMag=0.008*ramp;
+        // === Per-ball turbulence (softer) ===
+        const turbMag=0.004*ramp;
         Body.applyForce(b.body,pos,{
-            x:Math.sin(t*4.7+seed)*turbMag+Math.sin(t*7.3+seed*2.1)*turbMag*0.5,
-            y:Math.cos(t*3.9+seed*1.4)*turbMag+Math.cos(t*6.1+seed*0.7)*turbMag*0.5
+            x:Math.sin(t*4.7+seed)*turbMag+Math.sin(t*7.3+seed*2.1)*turbMag*0.4,
+            y:Math.cos(t*3.9+seed*1.4)*turbMag+Math.cos(t*6.1+seed*0.7)*turbMag*0.4
         });
 
-        // === Random individual kicks (ball gets hit by air pocket) ===
+        // === Occasional gentle kicks ===
         const kickPhase=Math.sin(t*8.3+seed*3.7);
-        if(kickPhase>0.92){
+        if(kickPhase>0.95){
             Body.applyForce(b.body,pos,{
-                x:(Math.random()-.5)*0.04*ramp,
-                y:-(Math.random()*0.03)*ramp
+                x:(Math.random()-.5)*0.02*ramp,
+                y:-(Math.random()*0.015)*ramp
             });
         }
 
@@ -584,36 +583,68 @@ function drawMachine(){
     ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;ctx.stroke();
     ctx.restore();
 
-    // === GATE MECHANISM (bottom center) ===
-    const gateW=BALL_R*2+8;
-    const gateH=12;
-    const gateY=my+mr-2;
-    ctx.save();
-    ctx.fillStyle='#333';
-    ctx.strokeStyle='#666';ctx.lineWidth=2;
-    ctx.beginPath();
-    ctx.moveTo(mx-gateW*.8,gateY);
-    ctx.lineTo(mx-gateW*.5,gateY+gateH);
-    ctx.lineTo(mx-gateW*.5,gateY+gateH+BALL_R*2+4);
-    ctx.lineTo(mx+gateW*.5,gateY+gateH+BALL_R*2+4);
-    ctx.lineTo(mx+gateW*.5,gateY+gateH);
-    ctx.lineTo(mx+gateW*.8,gateY);
-    ctx.closePath();ctx.fill();ctx.stroke();
+    // === CENTER EXTRACTION TUBE ===
+    const tubeW=BALL_R*2+6;
+    const tubeBottom=my+mr*0.6;// starts from lower half of globe
+    const tubeTop=my-mr-20;// extends above globe
+    const capR=BALL_R+6;// cap at top to trap ball
 
+    // Tube body (metallic)
+    ctx.save();
+    const tubeGrad=ctx.createLinearGradient(mx-tubeW/2,0,mx+tubeW/2,0);
+    tubeGrad.addColorStop(0,'rgba(80,80,100,.4)');
+    tubeGrad.addColorStop(.3,'rgba(150,150,170,.3)');
+    tubeGrad.addColorStop(.5,'rgba(180,180,200,.35)');
+    tubeGrad.addColorStop(.7,'rgba(150,150,170,.3)');
+    tubeGrad.addColorStop(1,'rgba(80,80,100,.4)');
+    ctx.fillStyle=tubeGrad;
+    ctx.fillRect(mx-tubeW/2,tubeTop+capR,tubeW,tubeBottom-tubeTop-capR);
+
+    // Tube edges
+    ctx.strokeStyle='rgba(200,200,220,.25)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(mx-tubeW/2,tubeBottom);ctx.lineTo(mx-tubeW/2,tubeTop+capR);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(mx+tubeW/2,tubeBottom);ctx.lineTo(mx+tubeW/2,tubeTop+capR);ctx.stroke();
+
+    // Neon glow when extracting (gateOpen = extracting)
     if(gateOpen){
-        gateAnim=Math.min(1,gateAnim+.05);
+        gateAnim=Math.min(1,gateAnim+.06);
     }else{
-        gateAnim=Math.max(0,gateAnim-.08);
+        gateAnim=Math.max(0,gateAnim-.04);
     }
-    const doorOffset=gateW*.45*gateAnim;
-    ctx.fillStyle='#c0392b';
-    ctx.fillRect(mx-gateW*.45,gateY+gateH-2,gateW*.45-doorOffset,6);
-    ctx.fillRect(mx+doorOffset,gateY+gateH-2,gateW*.45-doorOffset,6);
-    if(gateAnim<.5){
-        ctx.fillStyle='#e74c3c';
-        ctx.beginPath();ctx.arc(mx-gateW*.25,gateY+gateH+1,2,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.arc(mx+gateW*.25,gateY+gateH+1,2,0,Math.PI*2);ctx.fill();
+    if(gateAnim>0){
+        ctx.save();
+        const neonAlpha=gateAnim*0.6;
+        // Inner neon glow
+        const neonGrad=ctx.createLinearGradient(mx,tubeBottom,mx,tubeTop+capR);
+        neonGrad.addColorStop(0,`rgba(0,200,255,${neonAlpha*0.8})`);
+        neonGrad.addColorStop(.5,`rgba(0,255,200,${neonAlpha})`);
+        neonGrad.addColorStop(1,`rgba(0,200,255,${neonAlpha*0.5})`);
+        ctx.fillStyle=neonGrad;
+        ctx.fillRect(mx-tubeW/2+2,tubeTop+capR,tubeW-4,tubeBottom-tubeTop-capR);
+        // Glow blur around tube
+        ctx.shadowColor='rgba(0,220,255,0.6)';ctx.shadowBlur=15;
+        ctx.strokeStyle=`rgba(0,255,220,${neonAlpha})`;ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(mx-tubeW/2,tubeBottom);ctx.lineTo(mx-tubeW/2,tubeTop+capR);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(mx+tubeW/2,tubeBottom);ctx.lineTo(mx+tubeW/2,tubeTop+capR);ctx.stroke();
+        ctx.restore();
     }
+
+    // Cap at top (dome shape)
+    ctx.beginPath();
+    ctx.arc(mx,tubeTop+capR,capR,Math.PI,0);// half circle dome
+    const capGrad=ctx.createRadialGradient(mx-capR*.2,tubeTop+capR-capR*.3,0,mx,tubeTop+capR,capR);
+    capGrad.addColorStop(0,'#bbb');capGrad.addColorStop(.5,'#888');capGrad.addColorStop(1,'#555');
+    ctx.fillStyle=capGrad;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=1;ctx.stroke();
+
+    // Funnel at tube bottom (inside globe)
+    ctx.beginPath();
+    ctx.moveTo(mx-tubeW,tubeBottom+10);
+    ctx.lineTo(mx-tubeW/2,tubeBottom);
+    ctx.lineTo(mx+tubeW/2,tubeBottom);
+    ctx.lineTo(mx+tubeW,tubeBottom+10);
+    ctx.strokeStyle='rgba(200,200,220,.2)';ctx.lineWidth=1.5;ctx.stroke();
+
     ctx.restore();
 }
 
@@ -689,24 +720,29 @@ function drawWoodenTray(){
 }
 
 function drawDrawnBalls(){
-    // Lotto mode: single tray
     const total=drawQueue?drawQueue.length:6;
     const gap=BALL_R*2.4;
     const trayW=total*gap+20;
     const tx=machineX-trayW/2+10;
+    const capY=machineY-machineR-20+BALL_R+6;// ball starts at cap
 
     drawnBalls.forEach((b,i)=>{
         const targetX=tx+i*gap+gap/2;
         const targetY=trayY;
 
         if(b.exitAnim<1){
-            b.exitAnim=Math.min(1,b.exitAnim+.018);
+            b.exitAnim=Math.min(1,b.exitAnim+.015);
             const t=b.exitAnim;
-            if(t<.4){
-                const p=t/.4;b.dispX=exitX;b.dispY=exitY+(trayY-exitY)*p*p;
-            }else{
-                const p=(t-.4)/.6;const ease=1-Math.pow(1-p,2);
-                b.dispX=exitX+(targetX-exitX)*ease;b.dispY=trayY-Math.sin(p*Math.PI)*8;
+            // Phase 1: stay at cap briefly (0-0.2)
+            if(t<.2){
+                b.dispX=machineX;b.dispY=capY;
+            }
+            // Phase 2: arc from cap down to tray (0.2-1.0)
+            else{
+                const p=(t-.2)/.8;
+                const ease=1-Math.pow(1-p,2);
+                b.dispX=machineX+(targetX-machineX)*ease;
+                b.dispY=capY+(targetY-capY)*ease-Math.sin(p*Math.PI)*30;
             }
         }else{b.dispX=targetX;b.dispY=targetY}
         drawBall(b.dispX,b.dispY,BALL_R+1,b.color,b.label,true);
@@ -733,7 +769,7 @@ function loop(ts){
     // Sort by z: back balls drawn first, front balls drawn LAST (on top = overlap)
     ctx.save();
     ctx.beginPath();ctx.arc(machineX,machineY,machineR-2,0,Math.PI*2);ctx.clip();
-    const sortedBalls=[...balls].filter(b=>!b.drawn).sort((a,b)=>(a.z||0)-(b.z||0));
+    const sortedBalls=[...balls].filter(b=>!b.drawn&&!b.extracting).sort((a,b)=>(a.z||0)-(b.z||0));
     for(const b of sortedBalls){
         const z=b.z||0;// -1=back, 1=front
         // Size: very subtle difference (0.92 to 1.0) — globe isn't deep
@@ -746,6 +782,18 @@ function loop(ts){
         ctx.restore();
     }
     ctx.restore();
+
+    // Draw balls being extracted through tube
+    for(const b of balls){
+        if(!b.extracting)continue;
+        const elapsed=performance.now()-b.extractStart;
+        const prog=Math.min(1,elapsed/b.extractDur);
+        const ease=1-Math.pow(1-prog,3);// ease-out
+        const tubeBottom=machineY+machineR*0.6;
+        const tubeTop=machineY-machineR-20+BALL_R+6;
+        const ballY=tubeBottom+(tubeTop-tubeBottom)*ease;
+        drawBall(machineX,ballY,BALL_R,b.color,b.label,true);
+    }
 
     // Glass overlay on top
     drawGlassOverlay();
@@ -899,18 +947,28 @@ function drawNextBall(){
         return;
     }
     const item=drawQueue[currentDrawn];
-    // Rolling time: 6s for main, 10s for bonus (more suspense)
+    // Rolling time before extraction
     const rollTime=item.isBonus?9000+Math.random()*2000:5000+Math.random()*2000;
-    // Show "rolling" state, then open gate near end
     setTimeout(()=>{
+        // TUBE LIGHTS UP — neon glow activates
         gateOpen=true;
+        // Ball enters tube and rises (1.5s animation)
+        const b=balls[item.idx];
+        if(!b){currentDrawn++;gateOpen=false;setTimeout(drawNextBall,100);return}
+        // Start tube extraction animation
+        b.extracting=true;
+        b.extractStart=performance.now();
+        b.extractDur=1500;// 1.5s to rise through tube
+        // Remove from physics
+        if(b.body)Composite.remove(world,b.body);
+        SFX.pop();
+
+        // After tube animation completes, show at cap
         setTimeout(()=>{
-            const b=balls[item.idx];
-            if(!b){currentDrawn++;setTimeout(drawNextBall,100);return}
-            b.drawn=true;
-            if(b.body)Composite.remove(world,b.body);
-            SFX.pop();
-            drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,isBonus:item.isBonus});
+            b.drawn=true;b.extracting=false;
+            // capY = top of tube
+            const capY=machineY-machineR-20+BALL_R+6;
+            drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:machineX,dispY:capY,isBonus:item.isBonus});
             drawnResults.push({label:b.label,color:b.color,idx:item.idx,isBonus:item.isBonus});
             currentDrawn++;
             setTimeout(()=>{gateOpen=false;setTimeout(drawNextBall,800)},600);
