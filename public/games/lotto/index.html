@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>NotMePlz - Lotto Ball | 로또볼 뽑기</title>
+    <meta name="description" content="Free lotto ball picker! Team builder with tier balancing and number draw with realistic physics. 로또볼 뽑기, 팀 나누기.">
+    <meta name="keywords" content="lotto ball, team builder, random draw, 로또, 팀 나누기, party game, not me please">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FF6B35">
+    <link rel="apple-touch-icon" href="/assets/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#FF6B35;--secondary:#00D9FF;--accent:#FFE66D;--danger:#FF3366;--success:#00FF88;--dark:#0A0A1A}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100vh;overflow-x:hidden;color:#fff;-webkit-tap-highlight-color:transparent}
+
+#dynamicBg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;background:radial-gradient(ellipse at 50% 30%,rgba(255,230,109,0.08) 0%,transparent 50%),radial-gradient(ellipse at 50% 70%,rgba(0,217,255,0.06) 0%,transparent 50%),linear-gradient(180deg,#0A0A1A 0%,#12122A 50%,#0A0A1A 100%)}
+.stars{position:fixed;width:100%;height:100%;pointer-events:none;z-index:-1}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--dur) ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+
+/* Setup */
+#setupWrap{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;display:flex;justify-content:center;align-items:flex-start;padding:10px;overflow-y:auto}
+#setupScreen{background:linear-gradient(145deg,rgba(20,20,40,.95),rgba(10,10,30,.98));backdrop-filter:blur(30px);border-radius:24px;padding:24px 28px;text-align:center;border:2px solid rgba(255,230,109,.2);box-shadow:0 25px 80px rgba(0,0,0,.7);max-width:600px;width:98vw;margin:20px auto}
+#setupScreen::-webkit-scrollbar{width:6px}
+#setupScreen::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+#setupScreen h1{font-family:'Orbitron',sans-serif;font-size:1.7em;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--primary),var(--danger));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+#setupScreen h2{font-family:'Orbitron',sans-serif;color:rgba(255,255,255,.4);font-size:.7em;margin-bottom:16px;letter-spacing:3px}
+
+.lang-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;margin-bottom:14px}
+.lang-label{font-family:'Orbitron',sans-serif;font-size:.55em;color:rgba(255,255,255,.4);letter-spacing:2px}
+.lang-bar{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:340px}
+.lang-btn{width:30px;height:22px;border:2px solid rgba(255,255,255,.12);border-radius:5px;background:rgba(255,255,255,.04);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;padding:0;overflow:hidden}
+.lang-btn img{width:22px;height:16px;object-fit:cover;border-radius:2px}
+.lang-btn:hover{border-color:var(--accent);transform:scale(1.1)}
+.lang-btn.active{border-color:var(--accent);background:rgba(255,230,109,.15)}
+
+.section{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;margin-bottom:12px}
+.section h3{font-family:'Orbitron',sans-serif;font-size:.8em;color:var(--accent);letter-spacing:2px;margin-bottom:10px}
+
+/* Mode cards */
+.mode-cards{display:flex;gap:10px;margin-bottom:12px}
+.mode-card{flex:1;padding:16px 10px;border-radius:16px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);cursor:pointer;transition:all .3s;text-align:center}
+.mode-card:hover{border-color:rgba(255,230,109,.3);transform:translateY(-2px)}
+.mode-card.selected{border-color:var(--accent);background:rgba(255,230,109,.08);box-shadow:0 0 20px rgba(255,230,109,.12)}
+.mode-card .mc-icon{font-size:2em;display:block;margin-bottom:4px}
+.mode-card .mc-name{font-family:'Orbitron',sans-serif;font-size:.72em;color:#fff;font-weight:700}
+.mode-card .mc-desc{font-size:.62em;color:rgba(255,255,255,.4);margin-top:4px}
+
+/* Team builder inputs */
+.member-row{display:flex;align-items:center;gap:6px;margin:5px 0}
+.member-row input[type="text"]{flex:1;padding:7px 10px;border:2px solid transparent;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:.85em;outline:none;transition:all .3s}
+.member-row input:focus{border-color:var(--accent);background:rgba(255,255,255,.12)}
+.member-row select{padding:6px 4px;border-radius:10px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.15);font-size:.75em;cursor:pointer;outline:none}
+.member-row select option{background:#1a1a2e;color:#fff}
+.member-row .rm-btn{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,51,102,.5);color:#fff;font-size:.9em;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.member-row .rm-btn:hover{background:var(--danger)}
+#addMemberBtn{width:100%;padding:8px;margin-top:6px;border:2px dashed rgba(255,255,255,.15);border-radius:14px;background:transparent;color:rgba(255,255,255,.4);font-size:.82em;cursor:pointer;transition:all .3s}
+#addMemberBtn:hover{border-color:var(--success);color:var(--success)}
+
+/* Team count & balance */
+.opt-row{display:flex;gap:8px;align-items:center;justify-content:center;margin:8px 0;flex-wrap:wrap}
+.opt-chip{padding:7px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);cursor:pointer;transition:all .3s;font-size:.8em;font-weight:700}
+.opt-chip:hover{border-color:rgba(255,230,109,.3)}
+.opt-chip.selected{border-color:var(--accent);background:rgba(255,230,109,.1)}
+
+/* Lotto number options */
+.num-opt{display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap;justify-content:center}
+.num-opt label{font-size:.8em;color:rgba(255,255,255,.5)}
+.num-opt input[type="number"]{width:70px;padding:7px 10px;border:2px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:.9em;outline:none;text-align:center;font-family:'Orbitron',sans-serif}
+.num-opt input:focus{border-color:var(--accent)}
+
+.btn-group{display:flex;gap:10px;margin-top:14px;justify-content:center;flex-wrap:wrap}
+.btn{padding:10px 18px;font-size:.85em;font-weight:700;color:#fff;border:none;border-radius:20px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px)}
+.floating-home{position:fixed;bottom:14px;left:14px;z-index:1000;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.5);border:2px solid rgba(255,107,53,0.4);color:#fff;font-size:1.2em;display:flex;align-items:center;justify-content:center;text-decoration:none;backdrop-filter:blur(10px);transition:all 0.3s;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+.floating-home:hover{background:rgba(255,107,53,0.3);border-color:var(--primary);transform:scale(1.1)}
+#startBtn{padding:14px 36px;font-size:1.1em;font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--primary));color:#000;box-shadow:0 12px 35px rgba(255,230,109,.3);animation:startP 2s ease-in-out infinite}
+@keyframes startP{0%,100%{box-shadow:0 12px 35px rgba(255,230,109,.3)}50%{box-shadow:0 16px 45px rgba(255,230,109,.5)}}
+
+/* Game screen */
+#gameScreen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:50;background:linear-gradient(180deg,#080818 0%,#101028 50%,#080818 100%)}
+#gameCanvas{display:block;width:100%;height:100%}
+
+/* Result screen */
+#resultScreen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:300;justify-content:center;align-items:center;background:rgba(5,5,15,.92);backdrop-filter:blur(10px);padding:20px;overflow-y:auto}
+.result-card{background:linear-gradient(145deg,rgba(15,15,35,.98),rgba(25,25,55,.98));border-radius:24px;padding:28px;text-align:center;border:2px solid var(--accent);box-shadow:0 0 80px rgba(255,230,109,.2);width:560px;max-width:96vw;max-height:90vh;overflow-y:auto}
+.result-card h1{font-family:'Orbitron',sans-serif;font-size:1.6em;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+
+/* Teams result */
+.team-block{margin:10px 0;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.08)}
+.team-block h4{font-family:'Orbitron',sans-serif;font-size:.85em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.team-member{display:inline-block;padding:5px 12px;margin:3px;border-radius:10px;font-size:.82em;font-weight:700;background:rgba(255,255,255,.08)}
+.tier-badge{font-size:.65em;padding:1px 5px;border-radius:6px;margin-left:4px;font-weight:400}
+
+/* Lotto result */
+.drawn-balls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:16px 0}
+.drawn-ball{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:1.1em;font-weight:900;color:#fff;position:relative;box-shadow:0 4px 15px rgba(0,0,0,.4)}
+.drawn-ball::before{content:'';position:absolute;top:6px;left:10px;width:18px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transform:rotate(-30deg)}
+
+.share-panel{margin-top:16px}
+.share-panel h3{font-family:'Orbitron',sans-serif;font-size:.75em;color:var(--secondary);margin-bottom:8px;letter-spacing:2px}
+.share-buttons{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.share-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border:none;border-radius:16px;font-size:.75em;font-weight:700;color:#fff;cursor:pointer;transition:all .3s}
+.share-btn:hover{transform:translateY(-2px);filter:brightness(1.15)}
+.share-btn.kakao{background:#FEE500;color:#3C1E1E}.share-btn.line{background:#06C755}.share-btn.whatsapp{background:#25D366}.share-btn.telegram{background:#0088CC}.share-btn.twitter{background:#1DA1F2}.share-btn.facebook{background:#1877F2}.share-btn.copy-link{background:linear-gradient(135deg,#667,#445)}.share-btn.native-share{background:linear-gradient(135deg,var(--primary),var(--accent));display:none}
+.share-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--success);color:#000;padding:10px 24px;border-radius:20px;font-weight:700;z-index:400;display:none}
+
+.result-btns{display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap}
+.result-btns .btn{padding:10px 20px}
+.btn-replay{background:linear-gradient(135deg,var(--accent),var(--primary));color:#000}
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:350}
+
+@media(max-width:500px){
+    #setupScreen{padding:16px 12px}
+    #setupScreen h1{font-size:1.2em}
+    .mode-card{padding:10px 6px}.mode-card .mc-icon{font-size:1.4em}.mode-card .mc-name{font-size:.6em}
+    .member-row input[type="text"]{font-size:.78em;padding:5px 8px}
+    .member-row select{font-size:.68em}
+    .result-card{padding:18px 12px}
+    .drawn-ball{width:46px;height:46px;font-size:.9em}
+    .lang-btn{width:26px;height:19px}.lang-btn img{width:20px;height:14px}
+    .floating-home{width:38px;height:38px;font-size:1em;bottom:10px;left:10px}
+}
+    </style>
+</head>
+<body>
+<a href="/" class="floating-home" title="Home">🏠</a>
+<div id="dynamicBg"></div>
+<div class="stars" id="starsContainer"></div>
+
+<!-- SETUP -->
+<div id="setupWrap">
+<div id="setupScreen">
+    <div class="lang-wrap"><span class="lang-label">LANGUAGE</span>
+        <div class="lang-bar" id="langBar">
+            <button class="lang-btn" data-lang="en"><img src="https://flagcdn.com/w40/us.png" alt="US"></button>
+            <button class="lang-btn" data-lang="gb"><img src="https://flagcdn.com/w40/gb.png" alt="GB"></button>
+            <button class="lang-btn" data-lang="ko"><img src="https://flagcdn.com/w40/kr.png" alt="KR"></button>
+            <button class="lang-btn" data-lang="ja"><img src="https://flagcdn.com/w40/jp.png" alt="JP"></button>
+            <button class="lang-btn" data-lang="zh"><img src="https://flagcdn.com/w40/cn.png" alt="CN"></button>
+            <button class="lang-btn" data-lang="es"><img src="https://flagcdn.com/w40/es.png" alt="ES"></button>
+            <button class="lang-btn" data-lang="de"><img src="https://flagcdn.com/w40/de.png" alt="DE"></button>
+            <button class="lang-btn" data-lang="fr"><img src="https://flagcdn.com/w40/fr.png" alt="FR"></button>
+            <button class="lang-btn" data-lang="pt"><img src="https://flagcdn.com/w40/br.png" alt="BR"></button>
+            <button class="lang-btn" data-lang="ru"><img src="https://flagcdn.com/w40/ru.png" alt="RU"></button>
+            <button class="lang-btn" data-lang="ar"><img src="https://flagcdn.com/w40/sa.png" alt="SA"></button>
+            <button class="lang-btn" data-lang="hi"><img src="https://flagcdn.com/w40/in.png" alt="IN"></button>
+            <button class="lang-btn" data-lang="th"><img src="https://flagcdn.com/w40/th.png" alt="TH"></button>
+            <button class="lang-btn" data-lang="id"><img src="https://flagcdn.com/w40/id.png" alt="ID"></button>
+            <button class="lang-btn" data-lang="vi"><img src="https://flagcdn.com/w40/vn.png" alt="VN"></button>
+            <button class="lang-btn" data-lang="tr"><img src="https://flagcdn.com/w40/tr.png" alt="TR"></button>
+        </div>
+    </div>
+    <h1>🎱 <span id="titleText">Lotto Ball</span> 🎰</h1>
+    <h2 id="subtitleText">PICK YOUR DESTINY!</h2>
+
+    <div class="section"><h3>🎮 <span id="modeTitle">Mode</span></h3>
+        <div class="mode-cards" id="modeCards">
+            <div class="mode-card selected" data-mode="team"><span class="mc-icon">👥</span><span class="mc-name" id="mcTeam">Team Builder</span><span class="mc-desc" id="mcTeamDesc">Split into balanced teams!</span></div>
+            <div class="mode-card" data-mode="lotto"><span class="mc-icon">🎱</span><span class="mc-name" id="mcLotto">Number Draw</span><span class="mc-desc" id="mcLottoDesc">Draw lotto balls!</span></div>
+        </div>
+    </div>
+
+    <!-- Team Builder Options -->
+    <div id="teamSection">
+        <div class="section"><h3>👥 <span id="membersTitle">Members</span></h3>
+            <div id="memberInputs"></div>
+            <button id="addMemberBtn">+ <span id="addMemberText">Add Member</span></button>
+        </div>
+        <div class="section"><h3>⚙️ <span id="teamOptTitle">Team Options</span></h3>
+            <div style="font-size:.75em;color:rgba(255,255,255,.4);margin-bottom:6px" id="teamCountLabel">Number of Teams</div>
+            <div class="opt-row" id="teamCountRow">
+                <div class="opt-chip selected" data-tc="2">2</div>
+                <div class="opt-chip" data-tc="3">3</div>
+                <div class="opt-chip" data-tc="4">4</div>
+            </div>
+            <div style="font-size:.75em;color:rgba(255,255,255,.4);margin:8px 0 6px" id="balanceLabel">Balance Mode</div>
+            <div class="opt-row" id="balanceRow">
+                <div class="opt-chip selected" data-bal="random" id="balRandom">Random</div>
+                <div class="opt-chip" data-bal="balanced" id="balBalanced">Tier Balanced</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lotto Options -->
+    <div id="lottoSection" style="display:none">
+        <div class="section"><h3>🎱 <span id="lottoOptTitle">Number Settings</span></h3>
+            <div style="font-size:.75em;color:rgba(255,255,255,.4);margin-bottom:6px" id="presetLabel">Country Lotto Preset</div>
+            <div class="opt-row" id="lottoPresetRow" style="flex-wrap:wrap;gap:6px"></div>
+            <div style="height:10px"></div>
+            <div class="num-opt">
+                <label id="rangeLabel">Range:</label>
+                <input type="number" id="numStart" value="1" min="1" max="999">
+                <span>~</span>
+                <input type="number" id="numEnd" value="45" min="2" max="999">
+            </div>
+            <div class="num-opt">
+                <label id="drawCountLabel">Draw:</label>
+                <input type="number" id="drawCount" value="6" min="1" max="20">
+                <span id="ballsText">balls</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button id="startBtn">START!</button>
+    </div>
+</div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen"><canvas id="gameCanvas"></canvas></div>
+
+<!-- RESULT -->
+<div id="resultScreen"><div class="result-card">
+    <h1 id="resultH1">🎱 Results!</h1>
+    <div id="resultContent"></div>
+    <div class="share-panel"><h3>📢 SHARE</h3><div class="share-buttons" id="shareButtons"></div></div>
+    <div class="result-btns"><button class="btn btn-replay" id="replayBtn">🔄 Again</button></div>
+</div></div>
+<canvas id="confettiCanvas"></canvas>
+<div class="share-toast" id="shareToast"></div>
+
+<script>
+/* ========================================
+   NotMePlz - Lotto Ball
+   Team Builder + Number Draw
+   Canvas physics simulation
+======================================== */
+
+const I18N={
+en:{title:'Lotto Ball',subtitle:'PICK YOUR DESTINY!',mode:'Mode',teamBuilder:'Team Builder',teamDesc:'Split into balanced teams!',numberDraw:'Number Draw',numberDesc:'Draw lotto balls!',members:'Members',addMember:'Add Member',memberN:'Member {n}',teamOpt:'Team Options',teamCount:'Number of Teams',balance:'Balance Mode',random:'Random',balanced:'Tier Balanced',lottoOpt:'Number Settings',preset:'Country Lotto Preset',range:'Range:',drawCount:'Draw:',balls:'balls',tier:'Tier',noTier:'None',start:'START!',result:'Results!',team:'Team {n}',again:'Again',drawing:'Drawing balls...',complete:'Complete!',copied:'Copied!'},
+ko:{title:'로또볼 뽑기',subtitle:'운명의 공을 뽑아라!',mode:'모드',teamBuilder:'팀 나누기',teamDesc:'밸런스 맞춘 팀 구성!',numberDraw:'번호 뽑기',numberDesc:'로또공을 뽑자!',members:'참가자',addMember:'참가자 추가',memberN:'참가자 {n}',teamOpt:'팀 옵션',teamCount:'팀 수',balance:'밸런스 모드',random:'랜덤 섞기',balanced:'티어 밸런스',lottoOpt:'번호 설정',preset:'국가별 로또 프리셋',range:'범위:',drawCount:'뽑기:',balls:'개',tier:'티어',noTier:'없음',start:'시작!',result:'결과 발표!',team:'{n}팀',again:'다시하기',drawing:'공 뽑는 중...',complete:'완료!',copied:'복사됨!'},
+ja:{title:'ロットボール',subtitle:'運命のボールを引け！',mode:'モード',teamBuilder:'チーム分け',teamDesc:'バランスチーム！',numberDraw:'番号抽選',numberDesc:'ロトボールを引こう！',members:'メンバー',addMember:'追加',memberN:'メンバー{n}',teamOpt:'チーム設定',teamCount:'チーム数',balance:'バランス',random:'ランダム',balanced:'ティアバランス',lottoOpt:'番号設定',preset:'各国ロトプリセット',range:'範囲:',drawCount:'抽選:',balls:'個',tier:'ティア',noTier:'なし',start:'スタート！',result:'結果！',team:'チーム{n}',again:'もう一度',drawing:'抽選中...',complete:'完了！',copied:'コピー！'},
+zh:{title:'乐透球',subtitle:'抽出命运之球！',mode:'模式',teamBuilder:'分队',teamDesc:'平衡分队！',numberDraw:'号码抽选',numberDesc:'抽乐透球！',members:'成员',addMember:'添加',memberN:'成员{n}',teamOpt:'队伍设置',teamCount:'队伍数',balance:'平衡模式',random:'随机',balanced:'等级平衡',lottoOpt:'号码设置',preset:'各国彩票预设',range:'范围:',drawCount:'抽取:',balls:'个',tier:'等级',noTier:'无',start:'开始！',result:'结果！',team:'队伍{n}',again:'再来',drawing:'抽球中...',complete:'完成！',copied:'已复制！'},
+es:{title:'Bola de Lotería',subtitle:'¡ELIGE TU DESTINO!',mode:'Modo',teamBuilder:'Equipos',teamDesc:'¡Equipos balanceados!',numberDraw:'Sorteo',numberDesc:'¡Saca bolas!',members:'Miembros',addMember:'Añadir',memberN:'Miembro {n}',teamOpt:'Config Equipos',teamCount:'Nº Equipos',balance:'Balance',random:'Aleatorio',balanced:'Por Nivel',lottoOpt:'Config Números',preset:'Loteria por país',range:'Rango:',drawCount:'Sacar:',balls:'bolas',tier:'Nivel',noTier:'Sin',start:'¡EMPEZAR!',result:'¡Resultados!',team:'Equipo {n}',again:'Otra vez',drawing:'Sacando...',complete:'¡Listo!',copied:'¡Copiado!'},
+de:{title:'Lottokugel',subtitle:'ZIEH DEIN SCHICKSAL!',mode:'Modus',teamBuilder:'Teams',teamDesc:'Ausgewogene Teams!',numberDraw:'Ziehung',numberDesc:'Lottokugeln ziehen!',members:'Mitglieder',addMember:'Hinzufügen',memberN:'Mitglied {n}',teamOpt:'Team-Einstellungen',teamCount:'Teamanzahl',balance:'Balance',random:'Zufällig',balanced:'Tier-Balance',lottoOpt:'Nummern-Einstellungen',preset:'Länderlotto-Voreinstellung',range:'Bereich:',drawCount:'Ziehen:',balls:'Kugeln',tier:'Tier',noTier:'Ohne',start:'START!',result:'Ergebnisse!',team:'Team {n}',again:'Nochmal',drawing:'Ziehe...',complete:'Fertig!',copied:'Kopiert!'},
+fr:{title:'Boule Loto',subtitle:'TIRE TON DESTIN !',mode:'Mode',teamBuilder:'Équipes',teamDesc:'Équipes équilibrées !',numberDraw:'Tirage',numberDesc:'Tire des boules !',members:'Membres',addMember:'Ajouter',memberN:'Membre {n}',teamOpt:'Options Équipes',teamCount:'Nb Équipes',balance:'Équilibre',random:'Aléatoire',balanced:'Par Niveau',lottoOpt:'Options Numéros',preset:'Loto par pays',range:'Plage :',drawCount:'Tirer :',balls:'boules',tier:'Niveau',noTier:'Aucun',start:'JOUER !',result:'Résultats !',team:'Équipe {n}',again:'Rejouer',drawing:'Tirage...',complete:'Fini !',copied:'Copié !'},
+pt:{title:'Bola de Loteria',subtitle:'ESCOLHA SEU DESTINO!',mode:'Modo',teamBuilder:'Times',teamDesc:'Times balanceados!',numberDraw:'Sorteio',numberDesc:'Sorteie bolas!',members:'Membros',addMember:'Adicionar',memberN:'Membro {n}',teamOpt:'Config Times',teamCount:'Nº Times',balance:'Equilíbrio',random:'Aleatório',balanced:'Por Nível',lottoOpt:'Config Números',preset:'Loteria por país',range:'Faixa:',drawCount:'Sortear:',balls:'bolas',tier:'Nível',noTier:'Sem',start:'INICIAR!',result:'Resultados!',team:'Time {n}',again:'De novo',drawing:'Sorteando...',complete:'Pronto!',copied:'Copiado!'},
+ru:{title:'Лотобол',subtitle:'ВЫТЯНИ СВОЮ СУДЬБУ!',mode:'Режим',teamBuilder:'Команды',teamDesc:'Сбалансированные команды!',numberDraw:'Розыгрыш',numberDesc:'Тяни шары!',members:'Участники',addMember:'Добавить',memberN:'Участник {n}',teamOpt:'Настройки команд',teamCount:'Кол-во команд',balance:'Баланс',random:'Случайно',balanced:'По уровню',lottoOpt:'Настройки чисел',range:'Диапазон:',drawCount:'Тянуть:',balls:'шаров',tier:'Уровень',noTier:'Без',start:'СТАРТ!',result:'Результаты!',team:'Команда {n}',again:'Ещё раз',drawing:'Тянем...',complete:'Готово!',copied:'Скопировано!'},
+ar:{title:'كرة اليانصيب',subtitle:'اسحب قدرك!',mode:'الوضع',teamBuilder:'فرق',teamDesc:'فرق متوازنة!',numberDraw:'سحب',numberDesc:'اسحب الكرات!',members:'الأعضاء',addMember:'إضافة',memberN:'عضو {n}',teamOpt:'إعدادات الفرق',teamCount:'عدد الفرق',balance:'التوازن',random:'عشوائي',balanced:'متوازن',lottoOpt:'إعدادات الأرقام',range:'المدى:',drawCount:'سحب:',balls:'كرات',tier:'مستوى',noTier:'بدون',start:'ابدأ!',result:'النتائج!',team:'فريق {n}',again:'مرة أخرى',drawing:'يسحب...',complete:'تم!',copied:'تم النسخ!'},
+hi:{title:'लॉटो बॉल',subtitle:'अपनी किस्मत चुनो!',mode:'मोड',teamBuilder:'टीम',teamDesc:'संतुलित टीमें!',numberDraw:'ड्रा',numberDesc:'गेंदें निकालो!',members:'सदस्य',addMember:'जोड़ें',memberN:'सदस्य {n}',teamOpt:'टीम सेटिंग',teamCount:'टीमों की संख्या',balance:'बैलेंस',random:'रैंडम',balanced:'टियर बैलेंस',lottoOpt:'नंबर सेटिंग',range:'सीमा:',drawCount:'निकालें:',balls:'गेंदें',tier:'टियर',noTier:'बिना',start:'शुरू!',result:'परिणाम!',team:'टीम {n}',again:'फिर से',drawing:'निकाल रहे...',complete:'पूरा!',copied:'कॉपी!'},
+th:{title:'ลูกบอลลอตโต',subtitle:'จับโชคของคุณ!',mode:'โหมด',teamBuilder:'แบ่งทีม',teamDesc:'ทีมสมดุล!',numberDraw:'จับฉลาก',numberDesc:'จับลูกบอล!',members:'สมาชิก',addMember:'เพิ่ม',memberN:'สมาชิก {n}',teamOpt:'ตั้งค่าทีม',teamCount:'จำนวนทีม',balance:'สมดุล',random:'สุ่ม',balanced:'ตามระดับ',lottoOpt:'ตั้งค่าตัวเลข',range:'ช่วง:',drawCount:'จับ:',balls:'ลูก',tier:'ระดับ',noTier:'ไม่มี',start:'เริ่ม!',result:'ผลลัพธ์!',team:'ทีม {n}',again:'อีกครั้ง',drawing:'กำลังจับ...',complete:'เสร็จ!',copied:'คัดลอกแล้ว!'},
+id:{title:'Bola Lotre',subtitle:'AMBIL TAKDIRMU!',mode:'Mode',teamBuilder:'Tim',teamDesc:'Tim seimbang!',numberDraw:'Undian',numberDesc:'Ambil bola!',members:'Anggota',addMember:'Tambah',memberN:'Anggota {n}',teamOpt:'Pengaturan Tim',teamCount:'Jumlah Tim',balance:'Keseimbangan',random:'Acak',balanced:'Seimbang',lottoOpt:'Pengaturan Nomor',range:'Rentang:',drawCount:'Ambil:',balls:'bola',tier:'Tier',noTier:'Tanpa',start:'MULAI!',result:'Hasil!',team:'Tim {n}',again:'Lagi',drawing:'Mengambil...',complete:'Selesai!',copied:'Disalin!'},
+vi:{title:'Bóng Lô Tô',subtitle:'CHỌN VẬN MỆNH!',mode:'Chế độ',teamBuilder:'Chia đội',teamDesc:'Đội cân bằng!',numberDraw:'Quay số',numberDesc:'Rút bóng!',members:'Thành viên',addMember:'Thêm',memberN:'Thành viên {n}',teamOpt:'Cài đặt đội',teamCount:'Số đội',balance:'Cân bằng',random:'Ngẫu nhiên',balanced:'Theo cấp',lottoOpt:'Cài đặt số',range:'Phạm vi:',drawCount:'Rút:',balls:'bóng',tier:'Cấp',noTier:'Không',start:'BẮT ĐẦU!',result:'Kết quả!',team:'Đội {n}',again:'Lại',drawing:'Đang rút...',complete:'Xong!',copied:'Đã sao chép!'},
+tr:{title:'Loto Topu',subtitle:'KADERİNİ SEÇ!',mode:'Mod',teamBuilder:'Takımlar',teamDesc:'Dengeli takımlar!',numberDraw:'Çekiliş',numberDesc:'Top çek!',members:'Üyeler',addMember:'Ekle',memberN:'Üye {n}',teamOpt:'Takım Ayarları',teamCount:'Takım Sayısı',balance:'Denge',random:'Rastgele',balanced:'Seviye Dengeli',lottoOpt:'Numara Ayarları',range:'Aralık:',drawCount:'Çek:',balls:'top',tier:'Seviye',noTier:'Yok',start:'BAŞLA!',result:'Sonuçlar!',team:'Takım {n}',again:'Tekrar',drawing:'Çekiliyor...',complete:'Tamam!',copied:'Kopyalandı!'}
+};
+let lang='en';
+function T(k,v){let s=(I18N[lang]&&I18N[lang][k])||I18N.en[k]||k;if(v)Object.keys(v).forEach(x=>{s=s.replace('{'+x+'}',v[x])});return s}
+
+const BALL_COLORS=['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393','#00bcd4','#ff6b81','#a29bfe','#fd79a8','#00cec9','#fab1a0','#74b9ff','#55efc4','#fdcb6e','#6c5ce7','#ff7675','#636e72'];
+
+/* Country lotto presets: {flag, name, start, end, draw} */
+const LOTTO_PRESETS=[
+    {id:'kr',flag:'🇰🇷',name:'Lotto 6/45',start:1,end:45,draw:6,langs:['ko']},
+    {id:'us',flag:'🇺🇸',name:'Powerball',start:1,end:69,draw:5,langs:['en']},
+    {id:'gb',flag:'🇬🇧',name:'UK Lotto',start:1,end:59,draw:6,langs:['gb']},
+    {id:'jp',flag:'🇯🇵',name:'Loto 6',start:1,end:43,draw:6,langs:['ja']},
+    {id:'cn',flag:'🇨🇳',name:'双色球',start:1,end:33,draw:6,langs:['zh']},
+    {id:'es',flag:'🇪🇸',name:'La Primitiva',start:1,end:49,draw:6,langs:['es']},
+    {id:'de',flag:'🇩🇪',name:'Lotto 6/49',start:1,end:49,draw:6,langs:['de']},
+    {id:'fr',flag:'🇫🇷',name:'Loto',start:1,end:49,draw:5,langs:['fr']},
+    {id:'br',flag:'🇧🇷',name:'Mega-Sena',start:1,end:60,draw:6,langs:['pt']},
+    {id:'ru',flag:'🇷🇺',name:'Гослото 6/45',start:1,end:45,draw:6,langs:['ru']},
+    {id:'tr',flag:'🇹🇷',name:'Sayısal Loto',start:1,end:49,draw:6,langs:['tr']},
+    {id:'th',flag:'🇹🇭',name:'Thai Lottery',start:1,end:99,draw:6,langs:['th']},
+    {id:'vn',flag:'🇻🇳',name:'Vietlott 6/45',start:1,end:45,draw:6,langs:['vi']},
+    {id:'in',flag:'🇮🇳',name:'Lotto India',start:1,end:50,draw:6,langs:['hi']},
+    {id:'id',flag:'🇮🇩',name:'Togel',start:1,end:45,draw:6,langs:['id']},
+    {id:'sa',flag:'🇸🇦',name:'Emirates Loto',start:1,end:49,draw:6,langs:['ar']}
+];
+
+let gameMode='team',memberCount=6,teamCount=2,balanceMode='random';
+let members=[],drawnResults=[],teamResults=[];
+
+/* Audio */
+const SFX=(()=>{let c;function g(){if(!c)c=new(window.AudioContext||window.webkitAudioContext)();return c}
+function p(f,d,t='sine',v=.12){try{const x=g(),o=x.createOscillator(),ga=x.createGain();o.type=t;o.frequency.value=f;ga.gain.setValueAtTime(v,x.currentTime);ga.gain.exponentialRampToValueAtTime(.001,x.currentTime+d);o.connect(ga);ga.connect(x.destination);o.start();o.stop(x.currentTime+d)}catch(e){}}
+function noise(d,v=.06){try{const x=g(),buf=x.createBuffer(1,x.sampleRate*d,x.sampleRate),data=buf.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;const src=x.createBufferSource(),ga=x.createGain();src.buffer=buf;ga.gain.setValueAtTime(v,x.currentTime);ga.gain.exponentialRampToValueAtTime(.001,x.currentTime+d);src.connect(ga);ga.connect(x.destination);src.start()}catch(e){}}
+return{pop(){p(800,.08,'sine',.15);noise(.03,.08)},whoosh(){noise(.15,.04)},fanfare(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>p(f,.25,'sine',.18),i*100))},click(){p(600,.04,'square',.08)},bounce(){noise(.02,.05);p(200,.05,'sine',.06)},g}
+})();
+
+function createStars(){const c=document.getElementById('starsContainer');for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*2.5+.5;s.style.cssText=`width:${z}px;height:${z}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s`;c.appendChild(s)}}
+
+/* Setup */
+function renderMembers(){
+    const c=document.getElementById('memberInputs');
+    const existing=[...c.querySelectorAll('input')].map(inp=>inp.value);
+    const existingTiers=[...c.querySelectorAll('select')].map(s=>s.value);
+    c.innerHTML='';
+    for(let i=0;i<memberCount;i++){
+        const r=document.createElement('div');r.className='member-row';
+        r.innerHTML=`<input type="text" placeholder="${T('memberN',{n:i+1})}" maxlength="20">
+        <select><option value="0">${T('noTier')}</option><option value="1">T1</option><option value="2">T2</option><option value="3">T3</option></select>
+        <button class="rm-btn">&times;</button>`;
+        c.appendChild(r);
+    }
+    c.querySelectorAll('input').forEach((inp,i)=>{if(existing[i])inp.value=existing[i]});
+    c.querySelectorAll('select').forEach((s,i)=>{if(existingTiers[i])s.value=existingTiers[i]});
+    c.querySelectorAll('.rm-btn').forEach(b=>b.addEventListener('click',()=>{if(memberCount<=2)return;memberCount--;renderMembers()}));
+}
+
+function applyLanguage(){
+    document.getElementById('titleText').textContent=T('title');
+    document.getElementById('subtitleText').textContent=T('subtitle');
+    document.getElementById('modeTitle').textContent=T('mode');
+    document.getElementById('mcTeam').textContent=T('teamBuilder');
+    document.getElementById('mcTeamDesc').textContent=T('teamDesc');
+    document.getElementById('mcLotto').textContent=T('numberDraw');
+    document.getElementById('mcLottoDesc').textContent=T('numberDesc');
+    document.getElementById('membersTitle').textContent=T('members');
+    document.getElementById('addMemberText').textContent=T('addMember');
+    document.getElementById('teamOptTitle').textContent=T('teamOpt');
+    document.getElementById('teamCountLabel').textContent=T('teamCount');
+    document.getElementById('balanceLabel').textContent=T('balance');
+    document.getElementById('balRandom').textContent=T('random');
+    document.getElementById('balBalanced').textContent=T('balanced');
+    document.getElementById('lottoOptTitle').textContent=T('lottoOpt');
+    document.getElementById('presetLabel').textContent=T('preset')||'Country Lotto Preset';
+    document.getElementById('rangeLabel').textContent=T('range');
+    document.getElementById('drawCountLabel').textContent=T('drawCount');
+    document.getElementById('ballsText').textContent=T('balls');
+    document.getElementById('startBtn').textContent=T('start');
+    document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+    renderMembers();
+    renderLottoPresets();
+}
+
+function renderLottoPresets(){
+    const row=document.getElementById('lottoPresetRow');
+    // Find which preset matches current language
+    const defaultPreset=LOTTO_PRESETS.find(p=>p.langs.includes(lang))||LOTTO_PRESETS[0];
+    // Sort: matching language first, then rest
+    const sorted=[defaultPreset,...LOTTO_PRESETS.filter(p=>p!==defaultPreset)];
+
+    row.innerHTML=sorted.map(p=>{
+        const sel=p===defaultPreset?'selected':'';
+        return `<div class="opt-chip ${sel}" data-preset="${p.id}" style="font-size:.72em;padding:5px 10px">${p.flag} ${p.name}<span style="color:rgba(255,255,255,.35);margin-left:4px;font-size:.85em">${p.start}-${p.end}/${p.draw}</span></div>`;
+    }).join('');
+
+    // Apply default preset values
+    applyLottoPreset(defaultPreset);
+
+    // Click handler
+    row.querySelectorAll('.opt-chip').forEach(chip=>{
+        chip.addEventListener('click',()=>{
+            row.querySelectorAll('.opt-chip').forEach(c=>c.classList.remove('selected'));
+            chip.classList.add('selected');
+            const preset=LOTTO_PRESETS.find(p=>p.id===chip.dataset.preset);
+            if(preset)applyLottoPreset(preset);
+            SFX.click();
+        });
+    });
+}
+
+function applyLottoPreset(preset){
+    document.getElementById('numStart').value=preset.start;
+    document.getElementById('numEnd').value=preset.end;
+    document.getElementById('drawCount').value=preset.draw;
+}
+
+function collectMembers(){
+    const rows=document.querySelectorAll('#memberInputs .member-row');
+    members=[];
+    rows.forEach((r,i)=>{
+        const name=r.querySelector('input').value.trim()||T('memberN',{n:i+1});
+        const tier=parseInt(r.querySelector('select').value);
+        members.push({name,tier,idx:i});
+    });
+}
+
+/* ============================================
+   CANVAS PHYSICS - LOTTO MACHINE
+============================================ */
+let canvas,ctx,dpr,W,H,animId;
+let balls=[],drawnBalls=[],drawing=false,drawQueue=[],currentDrawn=0;
+
+// Ball physics
+const GRAVITY=600,BOUNCE=.7,FRICTION=.99,BALL_R=18;
+// Machine dimensions (computed on resize)
+let machineX,machineY,machineR,exitX,exitY,exitR;
+
+function initCanvas(){
+    canvas=document.getElementById('gameCanvas');ctx=canvas.getContext('2d');
+    dpr=window.devicePixelRatio||1;resizeCanvas();
+}
+
+function resizeCanvas(){
+    W=window.innerWidth;H=window.innerHeight;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    machineR=Math.min(W*.35,H*.28,160);
+    machineX=W/2;machineY=H*.32;
+    // Gate at bottom center of globe
+    exitX=machineX;exitY=machineY+machineR+BALL_R+8;exitR=BALL_R+4;
+    // Tray position (wooden rack below gate)
+    trayY=exitY+BALL_R+30;
+    trayStartX=W/2;
+}
+let trayY=0,trayStartX=0,gateOpen=false,gateAnim=0;
+
+function createBalls(labels,colors){
+    balls=[];
+    const n=labels.length;
+    for(let i=0;i<n;i++){
+        const angle=Math.random()*Math.PI*2;
+        const dist=Math.random()*machineR*.5;
+        balls.push({
+            x:machineX+Math.cos(angle)*dist,
+            y:machineY+Math.sin(angle)*dist,
+            vx:(Math.random()-.5)*200,
+            vy:(Math.random()-.5)*200,
+            r:BALL_R,
+            label:labels[i],
+            color:colors[i%colors.length],
+            drawn:false,
+            exitAnim:0
+        });
+    }
+}
+
+function updateBalls(dt){
+    // Wind force (simulates blower)
+    const windPhase=performance.now()*.003;
+    const windX=Math.sin(windPhase)*120;
+    const windY=Math.cos(windPhase*1.3)*100-80;// upward bias
+
+    for(const b of balls){
+        if(b.drawn)continue;
+
+        // Apply forces
+        b.vy+=GRAVITY*dt;
+        b.vx+=windX*dt;
+        b.vy+=windY*dt;
+        b.vx*=FRICTION;b.vy*=FRICTION;
+
+        // Speed limit
+        const spd=Math.sqrt(b.vx*b.vx+b.vy*b.vy);
+        if(spd>500){b.vx*=500/spd;b.vy*=500/spd}
+
+        b.x+=b.vx*dt;b.y+=b.vy*dt;
+
+        // Constrain to machine circle
+        const dx=b.x-machineX,dy=b.y-machineY;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const maxDist=machineR-b.r;
+        if(dist>maxDist){
+            const nx=dx/dist,ny=dy/dist;
+            b.x=machineX+nx*maxDist;b.y=machineY+ny*maxDist;
+            // Reflect velocity
+            const dot=b.vx*nx+b.vy*ny;
+            b.vx-=2*dot*nx*BOUNCE;b.vy-=2*dot*ny*BOUNCE;
+            if(Math.abs(dot)>50)SFX.bounce();
+        }
+
+        // Ball-ball collision
+        for(const o of balls){
+            if(o===b||o.drawn)continue;
+            const bx=b.x-o.x,by=b.y-o.y;
+            const bd=Math.sqrt(bx*bx+by*by);
+            const minD=b.r+o.r;
+            if(bd<minD&&bd>0){
+                const nx=bx/bd,ny=by/bd;
+                const overlap=(minD-bd)/2;
+                b.x+=nx*overlap;b.y+=ny*overlap;
+                o.x-=nx*overlap;o.y-=ny*overlap;
+                const dvx=b.vx-o.vx,dvy=b.vy-o.vy;
+                const dvn=dvx*nx+dvy*ny;
+                if(dvn>0){
+                    b.vx-=dvn*nx*.8;b.vy-=dvn*ny*.8;
+                    o.vx+=dvn*nx*.8;o.vy+=dvn*ny*.8;
+                }
+            }
+        }
+    }
+}
+
+function drawBall(x,y,r,color,label,highlight=false){
+    ctx.save();
+    // Shadow
+    ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;
+
+    // Main sphere gradient
+    const g=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);
+    g.addColorStop(0,'rgba(255,255,255,.35)');
+    g.addColorStop(.3,color);
+    g.addColorStop(.8,color);
+    g.addColorStop(1,darkenColor(color,.3));
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+
+    // Glossy highlight
+    ctx.shadowColor='transparent';
+    const hl=ctx.createRadialGradient(x-r*.25,y-r*.3,0,x-r*.25,y-r*.3,r*.6);
+    hl.addColorStop(0,'rgba(255,255,255,.5)');
+    hl.addColorStop(.5,'rgba(255,255,255,.15)');
+    hl.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=hl;ctx.fill();
+
+    // White circle for number
+    if(label!==undefined){
+        const cr=r*.55;
+        ctx.beginPath();ctx.arc(x,y+r*.05,cr,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
+        // Number text
+        const fs=Math.min(r*.7,cr*1.2);
+        ctx.font=`900 ${fs}px 'Orbitron',sans-serif`;
+        ctx.fillStyle='#222';ctx.textAlign='center';ctx.textBaseline='middle';
+        const txt=String(label);
+        ctx.fillText(txt,x,y+r*.08,cr*1.8);
+    }
+
+    if(highlight){
+        ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=3;
+        ctx.beginPath();ctx.arc(x,y,r+2,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function darkenColor(hex,amt){
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return `rgb(${Math.max(0,Math.floor(r*(1-amt)))},${Math.max(0,Math.floor(g*(1-amt)))},${Math.max(0,Math.floor(b*(1-amt)))})`;
+}
+
+function drawMachine(){
+    const mx=machineX,my=machineY,mr=machineR;
+
+    // === STAND / PEDESTAL ===
+    ctx.save();
+    // Vertical stand pole
+    const poleW=16;
+    const poleTop=my+mr+5;const poleBot=trayY+10;
+    const poleGrad=ctx.createLinearGradient(mx-poleW,0,mx+poleW,0);
+    poleGrad.addColorStop(0,'#555');poleGrad.addColorStop(.3,'#999');poleGrad.addColorStop(.5,'#aaa');poleGrad.addColorStop(.7,'#999');poleGrad.addColorStop(1,'#555');
+    ctx.fillStyle=poleGrad;
+    ctx.fillRect(mx-poleW/2,poleTop,poleW,poleBot-poleTop);
+    ctx.restore();
+
+    // === GLASS GLOBE (behind balls) ===
+    ctx.save();
+    // Globe fill - subtle glass tint
+    ctx.beginPath();ctx.arc(mx,my,mr,0,Math.PI*2);
+    const glassFill=ctx.createRadialGradient(mx,my,mr*.2,mx,my,mr);
+    glassFill.addColorStop(0,'rgba(200,220,255,.03)');
+    glassFill.addColorStop(.7,'rgba(150,200,255,.02)');
+    glassFill.addColorStop(1,'rgba(100,150,200,.04)');
+    ctx.fillStyle=glassFill;ctx.fill();
+    ctx.restore();
+
+    // === METAL RIM (gold ring around globe) ===
+    ctx.save();
+    ctx.beginPath();ctx.arc(mx,my,mr+5,0,Math.PI*2);
+    const rimGrad=ctx.createLinearGradient(mx-mr,my-mr,mx+mr,my+mr);
+    rimGrad.addColorStop(0,'#8B7320');rimGrad.addColorStop(.2,'#D4AF37');rimGrad.addColorStop(.4,'#FFD700');rimGrad.addColorStop(.5,'#FFF8DC');rimGrad.addColorStop(.6,'#FFD700');rimGrad.addColorStop(.8,'#D4AF37');rimGrad.addColorStop(1,'#8B7320');
+    ctx.strokeStyle=rimGrad;ctx.lineWidth=6;ctx.stroke();
+    // Inner thin ring
+    ctx.beginPath();ctx.arc(mx,my,mr+1,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;ctx.stroke();
+    ctx.restore();
+
+    // === GATE MECHANISM (bottom center) ===
+    const gateW=BALL_R*2+8;
+    const gateH=12;
+    const gateY=my+mr-2;
+    // Gate housing (metal frame)
+    ctx.save();
+    ctx.fillStyle='#333';
+    ctx.strokeStyle='#666';ctx.lineWidth=2;
+    // Funnel shape narrowing to gate
+    ctx.beginPath();
+    ctx.moveTo(mx-gateW*.8,gateY);
+    ctx.lineTo(mx-gateW*.5,gateY+gateH);
+    ctx.lineTo(mx-gateW*.5,gateY+gateH+BALL_R*2+4);
+    ctx.lineTo(mx+gateW*.5,gateY+gateH+BALL_R*2+4);
+    ctx.lineTo(mx+gateW*.5,gateY+gateH);
+    ctx.lineTo(mx+gateW*.8,gateY);
+    ctx.closePath();ctx.fill();ctx.stroke();
+
+    // Gate doors (animate open/close)
+    if(gateOpen){
+        gateAnim=Math.min(1,gateAnim+.05);
+    }else{
+        gateAnim=Math.max(0,gateAnim-.08);
+    }
+    const doorOffset=gateW*.45*gateAnim;
+    // Left door
+    ctx.fillStyle='#c0392b';
+    ctx.fillRect(mx-gateW*.45,gateY+gateH-2,gateW*.45-doorOffset,6);
+    // Right door
+    ctx.fillRect(mx+doorOffset,gateY+gateH-2,gateW*.45-doorOffset,6);
+    // Door rivets
+    if(gateAnim<.5){
+        ctx.fillStyle='#e74c3c';
+        ctx.beginPath();ctx.arc(mx-gateW*.25,gateY+gateH+1,2,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(mx+gateW*.25,gateY+gateH+1,2,0,Math.PI*2);ctx.fill();
+    }
+    ctx.restore();
+}
+
+function drawGlassOverlay(){
+    const mx=machineX,my=machineY,mr=machineR;
+    ctx.save();
+    // Glass reflection arc (top-left)
+    ctx.beginPath();
+    ctx.arc(mx,my,mr-2,Math.PI*1.15,Math.PI*1.85);
+    const ref=ctx.createLinearGradient(mx-mr*.6,my-mr*.6,mx+mr*.2,my+mr*.2);
+    ref.addColorStop(0,'rgba(255,255,255,.12)');ref.addColorStop(.5,'rgba(255,255,255,.04)');ref.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.strokeStyle=ref;ctx.lineWidth=mr*.15;ctx.stroke();
+
+    // Small specular highlight
+    ctx.beginPath();ctx.ellipse(mx-mr*.35,my-mr*.4,mr*.15,mr*.08,-0.5,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.fill();
+
+    // Globe edge glow
+    ctx.beginPath();ctx.arc(mx,my,mr,0,Math.PI*2);
+    ctx.strokeStyle='rgba(200,230,255,.1)';ctx.lineWidth=2;ctx.stroke();
+    ctx.restore();
+}
+
+function drawSingleTray(tx,ty,slots,teamColor,teamLabel){
+    const gap=BALL_R*2.4;
+    const trayW=Math.max(slots,1)*gap+20;
+    const trayH=BALL_R*2+14;
+
+    ctx.save();
+    const woodGrad=ctx.createLinearGradient(tx,ty,tx,ty+trayH);
+    woodGrad.addColorStop(0,'#8B5E3C');woodGrad.addColorStop(.3,'#A0704F');woodGrad.addColorStop(.5,'#8B5E3C');woodGrad.addColorStop(.8,'#6B3F23');woodGrad.addColorStop(1,'#5A3420');
+    ctx.fillStyle=woodGrad;
+
+    ctx.beginPath();
+    ctx.moveTo(tx+6,ty);ctx.lineTo(tx+trayW-6,ty);
+    ctx.quadraticCurveTo(tx+trayW,ty,tx+trayW,ty+6);
+    ctx.lineTo(tx+trayW,ty+trayH-6);
+    ctx.quadraticCurveTo(tx+trayW,ty+trayH,tx+trayW-6,ty+trayH);
+    ctx.lineTo(tx+6,ty+trayH);
+    ctx.quadraticCurveTo(tx,ty+trayH,tx,ty+trayH-6);
+    ctx.lineTo(tx,ty+6);
+    ctx.quadraticCurveTo(tx,ty,tx+6,ty);
+    ctx.closePath();ctx.fill();
+
+    // Grain
+    ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=.5;
+    for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(tx+6,ty+3+i*(trayH/5));ctx.lineTo(tx+trayW-6,ty+3+i*(trayH/5));ctx.stroke()}
+
+    // Inner shadow
+    const ig=ctx.createLinearGradient(tx,ty,tx,ty+8);
+    ig.addColorStop(0,'rgba(0,0,0,.2)');ig.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=ig;ctx.fillRect(tx+3,ty+2,trayW-6,8);
+
+    // Border
+    ctx.strokeStyle='#4A2A15';ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(tx+6,ty);ctx.lineTo(tx+trayW-6,ty);ctx.quadraticCurveTo(tx+trayW,ty,tx+trayW,ty+6);ctx.lineTo(tx+trayW,ty+trayH-6);ctx.quadraticCurveTo(tx+trayW,ty+trayH,tx+trayW-6,ty+trayH);ctx.lineTo(tx+6,ty+trayH);ctx.quadraticCurveTo(tx,ty+trayH,tx,ty+trayH-6);ctx.lineTo(tx,ty+6);ctx.quadraticCurveTo(tx,ty,tx+6,ty);
+    ctx.closePath();ctx.stroke();
+
+    // Dividers
+    ctx.strokeStyle='rgba(0,0,0,.12)';ctx.lineWidth=1;
+    for(let i=1;i<slots;i++){const sx=tx+10+i*gap;ctx.beginPath();ctx.moveTo(sx,ty+3);ctx.lineTo(sx,ty+trayH-3);ctx.stroke()}
+
+    // Team label above tray
+    if(teamLabel){
+        ctx.fillStyle=teamColor||'#fff';
+        ctx.font=`bold ${Math.min(12,gap*.35)}px 'Orbitron',sans-serif`;
+        ctx.textAlign='center';
+        ctx.fillText(teamLabel,tx+trayW/2,ty-6);
+    }
+    ctx.restore();
+    return{tx:tx+10,gap};
+}
+
+function drawWoodenTray(){
+    if(gameMode==='team'&&teamTrays.length>0){
+        // Multiple trays for teams
+        const maxPerTeam=Math.ceil(members.length/teamCount);
+        const gap=BALL_R*2.4;
+        const trayW=maxPerTeam*gap+20;
+        const totalW=teamTrays.length*trayW+(teamTrays.length-1)*12;
+        let startX=machineX-totalW/2;
+
+        teamTrays.forEach((tray,i)=>{
+            const tx=startX+i*(trayW+12);
+            const ty=trayY-BALL_R-4;
+            drawSingleTray(tx,ty,maxPerTeam,tray.color,tray.label);
+        });
+    }else{
+        // Single tray for lotto mode
+        const total=drawQueue?drawQueue.length:6;
+        const gap=BALL_R*2.4;
+        const trayW=total*gap+20;
+        const tx=machineX-trayW/2;
+        const ty=trayY-BALL_R-4;
+        drawSingleTray(tx,ty,total,null,null);
+    }
+}
+
+function drawDrawnBalls(){
+    if(gameMode==='team'&&teamTrays.length>0){
+        // Draw balls into team trays
+        const maxPerTeam=Math.ceil(members.length/teamCount);
+        const gap=BALL_R*2.4;
+        const trayW=maxPerTeam*gap+20;
+        const totalW=teamTrays.length*trayW+(teamTrays.length-1)*12;
+        const startX=machineX-totalW/2;
+
+        teamTrays.forEach((tray,ti)=>{
+            const trayX=startX+ti*(trayW+12)+10;
+            tray.balls.forEach((b,si)=>{
+                const targetX=trayX+si*gap+gap/2;
+                const targetY=trayY;
+
+                if(b.exitAnim<1){
+                    b.exitAnim=Math.min(1,b.exitAnim+.02);
+                    const t=b.exitAnim;
+                    if(t<.35){
+                        const p=t/.35;
+                        b.dispX=exitX;b.dispY=exitY+(targetY-exitY)*p*p;
+                    }else{
+                        const p=(t-.35)/.65;
+                        const ease=1-Math.pow(1-p,2);
+                        b.dispX=exitX+(targetX-exitX)*ease;
+                        b.dispY=targetY-Math.sin(p*Math.PI)*10;
+                    }
+                }else{
+                    b.dispX=targetX;b.dispY=targetY;
+                }
+                drawBall(b.dispX,b.dispY,BALL_R+1,b.color,b.label,true);
+            });
+        });
+    }else{
+        // Lotto mode: single tray
+        const total=drawQueue?drawQueue.length:6;
+        const gap=BALL_R*2.4;
+        const trayW=total*gap+20;
+        const tx=machineX-trayW/2+10;
+
+        drawnBalls.forEach((b,i)=>{
+            const targetX=tx+i*gap+gap/2;
+            const targetY=trayY;
+
+            if(b.exitAnim<1){
+                b.exitAnim=Math.min(1,b.exitAnim+.018);
+                const t=b.exitAnim;
+                if(t<.4){
+                    const p=t/.4;b.dispX=exitX;b.dispY=exitY+(trayY-exitY)*p*p;
+                }else{
+                    const p=(t-.4)/.6;const ease=1-Math.pow(1-p,2);
+                    b.dispX=exitX+(targetX-exitX)*ease;b.dispY=trayY-Math.sin(p*Math.PI)*8;
+                }
+            }else{b.dispX=targetX;b.dispY=targetY}
+            drawBall(b.dispX,b.dispY,BALL_R+1,b.color,b.label,true);
+        });
+    }
+}
+
+/* Draw sequence */
+function startDrawSequence(labels,colors,count){
+    drawnBalls=[];currentDrawn=0;drawing=true;
+    drawQueue=[];
+    // Pick random indices
+    const indices=[...Array(labels.length).keys()];
+    for(let i=indices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indices[i],indices[j]]=[indices[j],indices[i]]}
+    for(let i=0;i<Math.min(count,labels.length);i++)drawQueue.push(indices[i]);
+    // Schedule draws
+    drawNext();
+}
+
+function drawNext(){
+    if(currentDrawn>=drawQueue.length){
+        drawing=false;gateOpen=false;
+        setTimeout(()=>{SFX.fanfare();setTimeout(showResult,1500)},500);
+        return;
+    }
+    const idx=drawQueue[currentDrawn];
+    // Open gate -> draw ball -> close gate
+    gateOpen=true;
+    setTimeout(()=>{
+        const b=balls[idx];
+        b.drawn=true;
+        SFX.pop();
+        drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY});
+        drawnResults.push({label:b.label,color:b.color,idx});
+        currentDrawn++;
+        // Close gate after ball exits
+        setTimeout(()=>{
+            gateOpen=false;
+            setTimeout(drawNext,600);
+        },500);
+    },600+Math.random()*300);
+}
+
+/* Main loop */
+let lastTime=0;
+function loop(ts){
+    const dt=Math.min((ts-(lastTime||ts))/1000,.033);
+    lastTime=ts;
+    ctx.clearRect(0,0,W,H);
+
+    // Background
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#080818');bg.addColorStop(.5,'#101028');bg.addColorStop(1,'#080818');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+    drawMachine();
+    updateBalls(dt);
+
+    // Draw balls in machine (clip to globe)
+    ctx.save();
+    ctx.beginPath();ctx.arc(machineX,machineY,machineR-2,0,Math.PI*2);ctx.clip();
+    for(const b of balls){
+        if(!b.drawn)drawBall(b.x,b.y,b.r,b.color,b.label);
+    }
+    ctx.restore();
+
+    // Glass overlay on top
+    drawGlassOverlay();
+
+    // Wooden tray
+    drawWoodenTray();
+
+    // Drawn balls in tray
+    drawDrawnBalls();
+
+    // Status text
+    if(drawing){
+        ctx.fillStyle='rgba(255,230,109,.8)';ctx.font='bold 14px "Noto Sans KR",sans-serif';
+        ctx.textAlign='center';ctx.fillText(T('drawing'),W/2,H-30);
+    }else if(drawnBalls.length>0){
+        ctx.fillStyle='rgba(0,255,136,.8)';ctx.font='bold 14px "Noto Sans KR",sans-serif';
+        ctx.textAlign='center';ctx.fillText(T('complete'),W/2,H-30);
+    }
+
+    animId=requestAnimationFrame(loop);
+}
+
+/* ============================================
+   TEAM BUILDER
+============================================ */
+let teamTrays=[];// [{label,color,members:[{name,tier,ballIdx}]}]
+let teamDrawQueue=[];// ordered draw: [{ballIdx, teamIdx}]
+let teamDrawCurrent=0;
+const TEAM_COLORS=['#e74c3c','#3498db','#2ecc71','#f1c40f'];
+
+function buildTeams(){
+    collectMembers();
+    const n=members.length;
+
+    // Build teams
+    let assignment;// array of {member, teamIdx}
+    if(balanceMode==='balanced'){
+        // Group by tier, then snake draft each tier group
+        const tierGroups={};
+        members.forEach((m,i)=>{const t=m.tier||0;if(!tierGroups[t])tierGroups[t]=[];tierGroups[t].push({...m,origIdx:i})});
+        const tiers=Object.keys(tierGroups).sort((a,b)=>(+a||99)-(+b||99));
+        const teams=Array.from({length:teamCount},()=>[]);
+        let dir=1,col=0;
+        for(const tier of tiers){
+            // Shuffle within tier
+            const group=tierGroups[tier];
+            for(let i=group.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[group[i],group[j]]=[group[j],group[i]]}
+            for(const m of group){
+                teams[col].push(m);
+                col+=dir;
+                if(col>=teamCount){dir=-1;col=teamCount-1}
+                else if(col<0){dir=1;col=0}
+            }
+        }
+        assignment=[];
+        teams.forEach((team,ti)=>team.forEach(m=>assignment.push({member:m,teamIdx:ti})));
+    }else{
+        // Full random shuffle then round-robin
+        const shuffled=[...members.map((m,i)=>({...m,origIdx:i}))];
+        for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]}
+        assignment=shuffled.map((m,i)=>({member:m,teamIdx:i%teamCount}));
+    }
+
+    // Build teamResults for result screen
+    const teams=Array.from({length:teamCount},()=>[]);
+    assignment.forEach(a=>teams[a.teamIdx].push(a.member));
+    teamResults=teams;
+
+    // Build team trays info
+    teamTrays=[];
+    for(let t=0;t<teamCount;t++){
+        teamTrays.push({
+            label:T('team',{n:t+1}),
+            color:TEAM_COLORS[t%TEAM_COLORS.length],
+            balls:[]// filled as drawn
+        });
+    }
+
+    // Create balls (use member colors matching team)
+    const labels=members.map(m=>m.name.substring(0,3));
+    const colors=members.map((_,i)=>TEAM_COLORS[assignment.find(a=>a.member.origIdx===i)?.teamIdx||0]);
+
+    document.getElementById('setupWrap').style.display='none';
+    document.getElementById('gameScreen').style.display='block';
+    initCanvas();
+    createBalls(labels,colors);
+    drawnResults=[];drawnBalls=[];
+
+    // Build draw queue: if balanced, draw by tier order; else random
+    if(balanceMode==='balanced'){
+        // Group assignment by tier, then within each tier randomize draw order
+        const tierOrder={};
+        assignment.forEach(a=>{const t=a.member.tier||0;if(!tierOrder[t])tierOrder[t]=[];tierOrder[t].push(a)});
+        const tiers=Object.keys(tierOrder).sort((a,b)=>(+a||99)-(+b||99));
+        teamDrawQueue=[];
+        for(const tier of tiers){
+            const group=tierOrder[tier];
+            for(let i=group.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[group[i],group[j]]=[group[j],group[i]]}
+            group.forEach(a=>teamDrawQueue.push({ballIdx:a.member.origIdx,teamIdx:a.teamIdx,tier:a.member.tier}));
+        }
+    }else{
+        teamDrawQueue=[];
+        // Shuffle assignment order
+        const shuffledA=[...assignment];
+        for(let i=shuffledA.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffledA[i],shuffledA[j]]=[shuffledA[j],shuffledA[i]]}
+        shuffledA.forEach(a=>teamDrawQueue.push({ballIdx:a.member.origIdx,teamIdx:a.teamIdx,tier:a.member.tier}));
+    }
+
+    teamDrawCurrent=0;drawing=true;gateOpen=false;
+    lastTime=0;animId=requestAnimationFrame(loop);
+    drawNextTeam();
+}
+
+function drawNextTeam(){
+    if(teamDrawCurrent>=teamDrawQueue.length){
+        drawing=false;gateOpen=false;
+        setTimeout(()=>{SFX.fanfare();setTimeout(showResult,1500)},500);
+        return;
+    }
+    const item=teamDrawQueue[teamDrawCurrent];
+    gateOpen=true;
+    setTimeout(()=>{
+        const b=balls[item.ballIdx];
+        b.drawn=true;
+        SFX.pop();
+        const slotIdx=teamTrays[item.teamIdx].balls.length;
+        teamTrays[item.teamIdx].balls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,slotIdx});
+        teamDrawCurrent++;
+        setTimeout(()=>{
+            gateOpen=false;
+            setTimeout(drawNextTeam,500);
+        },400);
+    },500+Math.random()*200);
+}
+
+/* ============================================
+   LOTTO NUMBER DRAW
+============================================ */
+function startLottoDraw(){
+    const start=parseInt(document.getElementById('numStart').value)||1;
+    const end=parseInt(document.getElementById('numEnd').value)||45;
+    const count=parseInt(document.getElementById('drawCount').value)||6;
+    const range=Math.max(end,start)-Math.min(end,start)+1;
+    const lo=Math.min(start,end);
+
+    const allNums=[];for(let i=0;i<range;i++)allNums.push(lo+i);
+    const colors=allNums.map((_,i)=>BALL_COLORS[i%BALL_COLORS.length]);
+
+    teamTrays=[];// Clear team trays for lotto mode
+
+    document.getElementById('setupWrap').style.display='none';
+    document.getElementById('gameScreen').style.display='block';
+    initCanvas();
+    createBalls(allNums,colors);
+    drawnResults=[];drawnBalls=[];
+    lastTime=0;animId=requestAnimationFrame(loop);
+    startDrawSequence(allNums,colors,Math.min(count,range));
+}
+
+/* Result */
+function showResult(){
+    if(animId)cancelAnimationFrame(animId);
+    document.getElementById('gameScreen').style.display='none';
+    document.getElementById('resultScreen').style.display='flex';
+    document.getElementById('resultH1').textContent='🎱 '+T('result');
+    startConfetti();SFX.fanfare();
+
+    const rc=document.getElementById('resultContent');
+    if(gameMode==='team'){
+        const teamColors=['#e74c3c','#3498db','#2ecc71','#f1c40f'];
+        rc.innerHTML=teamResults.map((team,i)=>{
+            const tc=teamColors[i%teamColors.length];
+            const membersHtml=team.map(m=>{
+                const tierBadge=m.tier?`<span class="tier-badge" style="background:rgba(255,255,255,.1)">T${m.tier}</span>`:'';
+                return `<span class="team-member">${m.name}${tierBadge}</span>`;
+            }).join('');
+            return `<div class="team-block" style="border-color:${tc}"><h4 style="color:${tc}">🏆 ${T('team',{n:i+1})}</h4>${membersHtml}</div>`;
+        }).join('');
+        buildShareBtns(teamResults.map((team,i)=>`${T('team',{n:i+1})}: ${team.map(m=>m.name).join(', ')}`).join('\n'));
+    }else{
+        const sorted=[...drawnResults].sort((a,b)=>a.label-b.label);
+        rc.innerHTML=`<div class="drawn-balls">${sorted.map(b=>`<div class="drawn-ball" style="background:${b.color}">${b.label}</div>`).join('')}</div>`;
+        buildShareBtns('Numbers: '+sorted.map(b=>b.label).join(', '));
+    }
+}
+
+function buildShareBtns(text){
+    const full=`NotMePlz Lotto 🎱\n${text}\nhttps://notmeplz.com/games/lotto/`;
+    const enc=encodeURIComponent(full);const eu=encodeURIComponent('https://notmeplz.com/games/lotto/');
+    let h=`<button class="share-btn kakao" onclick="copyS()">💬 Kakao</button><button class="share-btn whatsapp" onclick="window.open('https://wa.me/?text=${enc}')">💬 WhatsApp</button><button class="share-btn telegram" onclick="window.open('https://t.me/share/url?url=${eu}&text=${enc}')">✈️ Telegram</button><button class="share-btn twitter" onclick="window.open('https://twitter.com/intent/tweet?text=${enc}')">🐦 X</button><button class="share-btn copy-link" onclick="copyS()">🔗 Copy</button>`;
+    if(navigator.share)h+=`<button class="share-btn native-share" style="display:flex" onclick="navigator.share({title:'NotMePlz Lotto',text:window._st,url:'https://notmeplz.com/games/lotto/'}).catch(()=>{})">📤 Share</button>`;
+    document.getElementById('shareButtons').innerHTML=h;window._st=full;
+}
+function copyS(){navigator.clipboard.writeText(window._st).then(()=>{const t=document.getElementById('shareToast');t.textContent=T('copied');t.style.display='block';setTimeout(()=>t.style.display='none',2000)})}
+
+/* Confetti */
+let confetti=[],confCanvas,confCtx;
+function startConfetti(){confCanvas=document.getElementById('confettiCanvas');confCtx=confCanvas.getContext('2d');confCanvas.width=W||window.innerWidth;confCanvas.height=H||window.innerHeight;confetti=[];for(let i=0;i<120;i++)confetti.push({x:Math.random()*confCanvas.width,y:Math.random()*-confCanvas.height,vx:(Math.random()-.5)*3,vy:Math.random()*4+2,rot:Math.random()*360,rv:(Math.random()-.5)*10,w:Math.random()*8+4,h:Math.random()*4+2,color:BALL_COLORS[Math.floor(Math.random()*BALL_COLORS.length)],life:3+Math.random()*2});let lt=0;function cl(ts){const dt=Math.min((ts-(lt||ts))/1000,.05);lt=ts;confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);confetti=confetti.filter(c=>{c.life-=dt;if(c.life<=0)return false;c.x+=c.vx;c.y+=c.vy;c.rot+=c.rv;c.vy+=.1;confCtx.save();confCtx.translate(c.x,c.y);confCtx.rotate(c.rot*Math.PI/180);confCtx.globalAlpha=Math.min(1,c.life);confCtx.fillStyle=c.color;confCtx.fillRect(-c.w/2,-c.h/2,c.w,c.h);confCtx.restore();return true});if(confetti.length)requestAnimationFrame(cl)}requestAnimationFrame(cl)}
+
+/* Init */
+function init(){
+    const saved=localStorage.getItem('gloryCarRacing_lang');
+    if(saved&&I18N[saved])lang=saved;
+    else{const m={'ko':'ko','en':'en','es':'es','de':'de','fr':'fr','ja':'ja','zh':'zh','pt':'pt','ru':'ru','ar':'ar','hi':'hi','th':'th','id':'id','vi':'vi','tr':'tr'};const ls=navigator.languages||[navigator.language||'en'];for(const l of ls){if(l.toLowerCase()==='en-gb'){lang='gb';break}const p=l.split('-')[0].toLowerCase();if(m[p]){lang=m[p];break}}}
+
+    createStars();applyLanguage();
+
+    document.getElementById('langBar').addEventListener('click',e=>{const b=e.target.closest('.lang-btn');if(!b)return;lang=b.dataset.lang;localStorage.setItem('gloryCarRacing_lang',lang);applyLanguage()});
+
+    document.getElementById('modeCards').addEventListener('click',e=>{const c=e.target.closest('.mode-card');if(!c)return;document.querySelectorAll('.mode-card').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');gameMode=c.dataset.mode;
+    document.getElementById('teamSection').style.display=gameMode==='team'?'block':'none';
+    document.getElementById('lottoSection').style.display=gameMode==='lotto'?'block':'none';SFX.click()});
+
+    document.getElementById('addMemberBtn').addEventListener('click',()=>{if(memberCount>=20)return;memberCount++;renderMembers()});
+
+    document.getElementById('teamCountRow').addEventListener('click',e=>{const c=e.target.closest('.opt-chip');if(!c)return;document.querySelectorAll('#teamCountRow .opt-chip').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');teamCount=parseInt(c.dataset.tc);SFX.click()});
+
+    document.getElementById('balanceRow').addEventListener('click',e=>{const c=e.target.closest('.opt-chip');if(!c)return;document.querySelectorAll('#balanceRow .opt-chip').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');balanceMode=c.dataset.bal;SFX.click()});
+
+    document.getElementById('startBtn').addEventListener('click',()=>{SFX.g();if(gameMode==='team')buildTeams();else startLottoDraw()});
+
+    document.getElementById('replayBtn').addEventListener('click',()=>{
+        if(animId)cancelAnimationFrame(animId);
+        confetti=[];if(confCtx)confCtx.clearRect(0,0,confCanvas.width,confCanvas.height);
+        document.getElementById('resultScreen').style.display='none';
+        document.getElementById('gameScreen').style.display='none';
+        document.getElementById('setupWrap').style.display='flex';
+        drawnResults=[];drawnBalls=[];balls=[];
+    });
+
+    window.addEventListener('resize',()=>{if(document.getElementById('gameScreen').style.display==='block')resizeCanvas()});
+}
+init();
+</script>
+</body>
+</html>
