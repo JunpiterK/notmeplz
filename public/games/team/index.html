@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>NotMePlz - Lotto Number Draw | &#xB85C;&#xB610; &#xBC88;&#xD638; &#xBD09;&#xAE30;</title>
-    <meta name="description" content="Free lotto number draw with realistic physics ball machine! Country lotto presets included. &#xB85C;&#xB610; &#xBC88;&#xD638; &#xBD09;&#xAE30;.">
-    <meta name="keywords" content="lotto ball, number draw, random draw, &#xB85C;&#xB610;, &#xBC88;&#xD638; &#xBD09;&#xAE30;, party game, not me please">
+    <title>NotMePlz - Team Builder | &#xD300; &#xBD09;&#xAE30;</title>
+    <meta name="description" content="Free team builder with tier balancing! Split into balanced teams with realistic ball draw physics. &#xD300; &#xB098;&#xB204;&#xAE30;, &#xD300; &#xBD09;&#xAE30;.">
+    <meta name="keywords" content="team builder, team picker, random team, &#xD300; &#xB098;&#xB204;&#xAE30;, &#xD300; &#xBD09;&#xAE30;, party game, not me please">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#FF6B35">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">
@@ -42,12 +42,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100
 .section{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;margin-bottom:12px}
 .section h3{font-family:'Orbitron',sans-serif;font-size:.8em;color:var(--accent);letter-spacing:2px;margin-bottom:10px}
 
-/* Lotto number options */
-.num-opt{display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap;justify-content:center}
-.num-opt label{font-size:.8em;color:rgba(255,255,255,.5)}
-.num-opt input[type="number"]{width:70px;padding:7px 10px;border:2px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:.9em;outline:none;text-align:center;font-family:'Orbitron',sans-serif}
-.num-opt input:focus{border-color:var(--accent)}
+/* Team builder inputs */
+.member-row{display:flex;align-items:center;gap:6px;margin:5px 0}
+.member-row input[type="text"]{flex:1;padding:7px 10px;border:2px solid transparent;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:.85em;outline:none;transition:all .3s}
+.member-row input:focus{border-color:var(--accent);background:rgba(255,255,255,.12)}
+.member-row select{padding:6px 4px;border-radius:10px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.15);font-size:.75em;cursor:pointer;outline:none}
+.member-row select option{background:#1a1a2e;color:#fff}
+.member-row .rm-btn{width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,51,102,.5);color:#fff;font-size:.9em;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.member-row .rm-btn:hover{background:var(--danger)}
+#addMemberBtn{width:100%;padding:8px;margin-top:6px;border:2px dashed rgba(255,255,255,.15);border-radius:14px;background:transparent;color:rgba(255,255,255,.4);font-size:.82em;cursor:pointer;transition:all .3s}
+#addMemberBtn:hover{border-color:var(--success);color:var(--success)}
 
+/* Team count & balance */
 .opt-row{display:flex;gap:8px;align-items:center;justify-content:center;margin:8px 0;flex-wrap:wrap}
 .opt-chip{padding:7px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);cursor:pointer;transition:all .3s;font-size:.8em;font-weight:700}
 .opt-chip:hover{border-color:rgba(255,230,109,.3)}
@@ -70,10 +76,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100
 .result-card{background:linear-gradient(145deg,rgba(15,15,35,.98),rgba(25,25,55,.98));border-radius:24px;padding:28px;text-align:center;border:2px solid var(--accent);box-shadow:0 0 80px rgba(255,230,109,.2);width:560px;max-width:96vw;max-height:90vh;overflow-y:auto}
 .result-card h1{font-family:'Orbitron',sans-serif;font-size:1.6em;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
 
-/* Lotto result */
-.drawn-balls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:16px 0}
-.drawn-ball{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:1.1em;font-weight:900;color:#fff;position:relative;box-shadow:0 4px 15px rgba(0,0,0,.4)}
-.drawn-ball::before{content:'';position:absolute;top:6px;left:10px;width:18px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transform:rotate(-30deg)}
+/* Teams result */
+.team-block{margin:10px 0;padding:12px;border-radius:14px;border:2px solid rgba(255,255,255,.08)}
+.team-block h4{font-family:'Orbitron',sans-serif;font-size:.85em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.team-member{display:inline-block;padding:5px 12px;margin:3px;border-radius:10px;font-size:.82em;font-weight:700;background:rgba(255,255,255,.08)}
+.tier-badge{font-size:.65em;padding:1px 5px;border-radius:6px;margin-left:4px;font-weight:400}
 
 .share-panel{margin-top:16px}
 .share-panel h3{font-family:'Orbitron',sans-serif;font-size:.75em;color:var(--secondary);margin-bottom:8px;letter-spacing:2px}
@@ -91,8 +98,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100
 @media(max-width:500px){
     #setupScreen{padding:16px 12px}
     #setupScreen h1{font-size:1.2em}
+    .member-row input[type="text"]{font-size:.78em;padding:5px 8px}
+    .member-row select{font-size:.68em}
     .result-card{padding:18px 12px}
-    .drawn-ball{width:46px;height:46px;font-size:.9em}
     .lang-btn{width:26px;height:19px}.lang-btn img{width:20px;height:14px}
     .floating-home{width:38px;height:38px;font-size:1em;bottom:10px;left:10px}
 }
@@ -126,25 +134,26 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100
             <button class="lang-btn" data-lang="tr"><img src="https://flagcdn.com/w40/tr.png" alt="TR"></button>
         </div>
     </div>
-    <h1>&#x1F3B1; <span id="titleText">Lotto Ball</span> &#x1F3B0;</h1>
-    <h2 id="subtitleText">PICK YOUR DESTINY!</h2>
+    <h1>&#x1F465; <span id="titleText">Team Picker</span> &#x1F465;</h1>
+    <h2 id="subtitleText">BUILD YOUR DREAM TEAM!</h2>
 
-    <!-- Lotto Options -->
-    <div id="lottoSection">
-        <div class="section"><h3>&#x1F3B1; <span id="lottoOptTitle">Number Settings</span></h3>
-            <div style="font-size:.75em;color:rgba(255,255,255,.4);margin-bottom:6px" id="presetLabel">Country Lotto Preset</div>
-            <div class="opt-row" id="lottoPresetRow" style="flex-wrap:wrap;gap:6px"></div>
-            <div style="height:10px"></div>
-            <div class="num-opt">
-                <label id="rangeLabel">Range:</label>
-                <input type="number" id="numStart" value="1" min="1" max="999">
-                <span>~</span>
-                <input type="number" id="numEnd" value="45" min="2" max="999">
+    <!-- Team Builder Options -->
+    <div id="teamSection">
+        <div class="section"><h3>&#x1F465; <span id="membersTitle">Members</span></h3>
+            <div id="memberInputs"></div>
+            <button id="addMemberBtn">+ <span id="addMemberText">Add Member</span></button>
+        </div>
+        <div class="section"><h3>&#x2699;&#xFE0F; <span id="teamOptTitle">Team Options</span></h3>
+            <div style="font-size:.75em;color:rgba(255,255,255,.4);margin-bottom:6px" id="teamCountLabel">Number of Teams</div>
+            <div class="opt-row" id="teamCountRow">
+                <div class="opt-chip selected" data-tc="2">2</div>
+                <div class="opt-chip" data-tc="3">3</div>
+                <div class="opt-chip" data-tc="4">4</div>
             </div>
-            <div class="num-opt">
-                <label id="drawCountLabel">Draw:</label>
-                <input type="number" id="drawCount" value="6" min="1" max="20">
-                <span id="ballsText">balls</span>
+            <div style="font-size:.75em;color:rgba(255,255,255,.4);margin:8px 0 6px" id="balanceLabel">Balance Mode</div>
+            <div class="opt-row" id="balanceRow">
+                <div class="opt-chip selected" data-bal="random" id="balRandom">Random</div>
+                <div class="opt-chip" data-bal="balanced" id="balBalanced">Tier Balanced</div>
             </div>
         </div>
     </div>
@@ -160,7 +169,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100
 
 <!-- RESULT -->
 <div id="resultScreen"><div class="result-card">
-    <h1 id="resultH1">&#x1F3B1; Results!</h1>
+    <h1 id="resultH1">&#x1F465; Results!</h1>
     <div id="resultContent"></div>
     <div class="share-panel"><h3>&#x1F4E2; SHARE</h3><div class="share-buttons" id="shareButtons"></div></div>
     <div class="result-btns"><button class="btn btn-replay" id="replayBtn">&#x1F504; Again</button></div>
@@ -170,54 +179,35 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100
 
 <script>
 /* ========================================
-   NotMePlz - Lotto Ball
-   Number Draw - Canvas physics simulation
+   NotMePlz - Team Builder
+   Canvas physics simulation
 ======================================== */
 
 const I18N={
-en:{title:'Lotto Ball',subtitle:'PICK YOUR DESTINY!',lottoOpt:'Number Settings',preset:'Country Lotto Preset',range:'Range:',drawCount:'Draw:',balls:'balls',start:'START!',result:'Results!',again:'Again',drawing:'Drawing balls...',complete:'Complete!',copied:'Copied!'},
-ko:{title:'\uB85C\uB610\uBCFC \uBD09\uAE30',subtitle:'\uC6B4\uBA85\uC758 \uACF5\uC744 \uBD09\uC544\uB77C!',lottoOpt:'\uBC88\uD638 \uC124\uC815',preset:'\uAD6D\uAC00\uBCC4 \uB85C\uB610 \uD504\uB9AC\uC14B',range:'\uBC94\uC704:',drawCount:'\uBD09\uAE30:',balls:'\uAC1C',start:'\uC2DC\uC791!',result:'\uACB0\uACFC \uBC1C\uD45C!',again:'\uB2E4\uC2DC\uD558\uAE30',drawing:'\uACF5 \uBD09\uB294 \uC911...',complete:'\uC644\uB8CC!',copied:'\uBCF5\uC0AC\uB428!'},
-gb:{title:'Lotto Ball',subtitle:'PICK YOUR DESTINY!',lottoOpt:'Number Settings',preset:'Country Lotto Preset',range:'Range:',drawCount:'Draw:',balls:'balls',start:'START!',result:'Results!',again:'Again',drawing:'Drawing balls...',complete:'Complete!',copied:'Copied!'},
-ja:{title:'\u30ED\u30C3\u30C8\u30DC\u30FC\u30EB',subtitle:'\u904B\u547D\u306E\u30DC\u30FC\u30EB\u3092\u5F15\u3051\uFF01',lottoOpt:'\u756A\u53F7\u8A2D\u5B9A',preset:'\u5404\u56FD\u30ED\u30C8\u30D7\u30EA\u30BB\u30C3\u30C8',range:'\u7BC4\u56F2:',drawCount:'\u62BD\u9078:',balls:'\u500B',start:'\u30B9\u30BF\u30FC\u30C8\uFF01',result:'\u7D50\u679C\uFF01',again:'\u3082\u3046\u4E00\u5EA6',drawing:'\u62BD\u9078\u4E2D...',complete:'\u5B8C\u4E86\uFF01',copied:'\u30B3\u30D4\u30FC\uFF01'},
-zh:{title:'\u4E50\u900F\u7403',subtitle:'\u62BD\u51FA\u547D\u8FD0\u4E4B\u7403\uFF01',lottoOpt:'\u53F7\u7801\u8BBE\u7F6E',preset:'\u5404\u56FD\u5F69\u7968\u9884\u8BBE',range:'\u8303\u56F4:',drawCount:'\u62BD\u53D6:',balls:'\u4E2A',start:'\u5F00\u59CB\uFF01',result:'\u7ED3\u679C\uFF01',again:'\u518D\u6765',drawing:'\u62BD\u7403\u4E2D...',complete:'\u5B8C\u6210\uFF01',copied:'\u5DF2\u590D\u5236\uFF01'},
-es:{title:'Bola de Loter\u00EDa',subtitle:'\u00A1ELIGE TU DESTINO!',lottoOpt:'Config N\u00FAmeros',preset:'Loteria por pa\u00EDs',range:'Rango:',drawCount:'Sacar:',balls:'bolas',start:'\u00A1EMPEZAR!',result:'\u00A1Resultados!',again:'Otra vez',drawing:'Sacando...',complete:'\u00A1Listo!',copied:'\u00A1Copiado!'},
-de:{title:'Lottokugel',subtitle:'ZIEH DEIN SCHICKSAL!',lottoOpt:'Nummern-Einstellungen',preset:'L\u00E4nderlotto-Voreinstellung',range:'Bereich:',drawCount:'Ziehen:',balls:'Kugeln',start:'START!',result:'Ergebnisse!',again:'Nochmal',drawing:'Ziehe...',complete:'Fertig!',copied:'Kopiert!'},
-fr:{title:'Boule Loto',subtitle:'TIRE TON DESTIN !',lottoOpt:'Options Num\u00E9ros',preset:'Loto par pays',range:'Plage :',drawCount:'Tirer :',balls:'boules',start:'JOUER !',result:'R\u00E9sultats !',again:'Rejouer',drawing:'Tirage...',complete:'Fini !',copied:'Copi\u00E9 !'},
-pt:{title:'Bola de Loteria',subtitle:'ESCOLHA SEU DESTINO!',lottoOpt:'Config N\u00FAmeros',preset:'Loteria por pa\u00EDs',range:'Faixa:',drawCount:'Sortear:',balls:'bolas',start:'INICIAR!',result:'Resultados!',again:'De novo',drawing:'Sorteando...',complete:'Pronto!',copied:'Copiado!'},
-ru:{title:'\u041B\u043E\u0442\u043E\u0431\u043E\u043B',subtitle:'\u0412\u042B\u0422\u042F\u041D\u0418 \u0421\u0412\u041E\u042E \u0421\u0423\u0414\u042C\u0411\u0423!',lottoOpt:'\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0447\u0438\u0441\u0435\u043B',range:'\u0414\u0438\u0430\u043F\u0430\u0437\u043E\u043D:',drawCount:'\u0422\u044F\u043D\u0443\u0442\u044C:',balls:'\u0448\u0430\u0440\u043E\u0432',start:'\u0421\u0422\u0410\u0420\u0422!',result:'\u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u044B!',again:'\u0415\u0449\u0451 \u0440\u0430\u0437',drawing:'\u0422\u044F\u043D\u0435\u043C...',complete:'\u0413\u043E\u0442\u043E\u0432\u043E!',copied:'\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E!'},
-ar:{title:'\u0643\u0631\u0629 \u0627\u0644\u064A\u0627\u0646\u0635\u064A\u0628',subtitle:'\u0627\u0633\u062D\u0628 \u0642\u062F\u0631\u0643!',lottoOpt:'\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0623\u0631\u0642\u0627\u0645',range:'\u0627\u0644\u0645\u062F\u0649:',drawCount:'\u0633\u062D\u0628:',balls:'\u0643\u0631\u0627\u062A',start:'\u0627\u0628\u062F\u0623!',result:'\u0627\u0644\u0646\u062A\u0627\u0626\u062C!',again:'\u0645\u0631\u0629 \u0623\u062E\u0631\u0649',drawing:'\u064A\u0633\u062D\u0628...',complete:'\u062A\u0645!',copied:'\u062A\u0645 \u0627\u0644\u0646\u0633\u062E!'},
-hi:{title:'\u0932\u0949\u091F\u094B \u092C\u0949\u0932',subtitle:'\u0905\u092A\u0928\u0940 \u0915\u093F\u0938\u094D\u092E\u0924 \u091A\u0941\u0928\u094B!',lottoOpt:'\u0928\u0902\u092C\u0930 \u0938\u0947\u091F\u093F\u0902\u0917',range:'\u0938\u0940\u092E\u093E:',drawCount:'\u0928\u093F\u0915\u093E\u0932\u0947\u0902:',balls:'\u0917\u0947\u0902\u0926\u0947\u0902',start:'\u0936\u0941\u0930\u0942!',result:'\u092A\u0930\u093F\u0923\u093E\u092E!',again:'\u092B\u093F\u0930 \u0938\u0947',drawing:'\u0928\u093F\u0915\u093E\u0932 \u0930\u0939\u0947...',complete:'\u092A\u0942\u0930\u093E!',copied:'\u0915\u0949\u092A\u0940!'},
-th:{title:'\u0E25\u0E39\u0E01\u0E1A\u0E2D\u0E25\u0E25\u0E2D\u0E15\u0E42\u0E15',subtitle:'\u0E08\u0E31\u0E1A\u0E42\u0E0A\u0E04\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13!',lottoOpt:'\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E15\u0E31\u0E27\u0E40\u0E25\u0E02',range:'\u0E0A\u0E48\u0E27\u0E07:',drawCount:'\u0E08\u0E31\u0E1A:',balls:'\u0E25\u0E39\u0E01',start:'\u0E40\u0E23\u0E34\u0E48\u0E21!',result:'\u0E1C\u0E25\u0E25\u0E31\u0E1E\u0E18\u0E4C!',again:'\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07',drawing:'\u0E01\u0E33\u0E25\u0E31\u0E07\u0E08\u0E31\u0E1A...',complete:'\u0E40\u0E2A\u0E23\u0E47\u0E08!',copied:'\u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01\u0E41\u0E25\u0E49\u0E27!'},
-id:{title:'Bola Lotre',subtitle:'AMBIL TAKDIRMU!',lottoOpt:'Pengaturan Nomor',range:'Rentang:',drawCount:'Ambil:',balls:'bola',start:'MULAI!',result:'Hasil!',again:'Lagi',drawing:'Mengambil...',complete:'Selesai!',copied:'Disalin!'},
-vi:{title:'B\u00F3ng L\u00F4 T\u00F4',subtitle:'CH\u1ECCN V\u1EACN M\u1EC6NH!',lottoOpt:'C\u00E0i \u0111\u1EB7t s\u1ED1',range:'Ph\u1EA1m vi:',drawCount:'R\u00FAt:',balls:'b\u00F3ng',start:'B\u1EAFT \u0110\u1EA6U!',result:'K\u1EBFt qu\u1EA3!',again:'L\u1EA1i',drawing:'\u0110ang r\u00FAt...',complete:'Xong!',copied:'\u0110\u00E3 sao ch\u00E9p!'},
-tr:{title:'Loto Topu',subtitle:'KADER\u0130N\u0130 SE\u00C7!',lottoOpt:'Numara Ayarlar\u0131',range:'Aral\u0131k:',drawCount:'\u00C7ek:',balls:'top',start:'BA\u015ELA!',result:'Sonu\u00E7lar!',again:'Tekrar',drawing:'\u00C7ekiliyor...',complete:'Tamam!',copied:'Kopyaland\u0131!'}
+en:{title:'Team Picker',subtitle:'BUILD YOUR DREAM TEAM!',members:'Members',addMember:'Add Member',memberN:'Member {n}',teamOpt:'Team Options',teamCount:'Number of Teams',balance:'Balance Mode',random:'Random',balanced:'Tier Balanced',tier:'Tier',noTier:'None',start:'START!',result:'Results!',team:'Team {n}',again:'Again',drawing:'Drawing balls...',complete:'Complete!',copied:'Copied!'},
+ko:{title:'\uD300 \uBD09\uAE30',subtitle:'\uB4DC\uB9BC\uD300\uC744 \uB9CC\uB4E4\uC5B4\uBD10!',members:'\uCC38\uAC00\uC790',addMember:'\uCC38\uAC00\uC790 \uCD94\uAC00',memberN:'\uCC38\uAC00\uC790 {n}',teamOpt:'\uD300 \uC635\uC158',teamCount:'\uD300 \uC218',balance:'\uBC38\uB7F0\uC2A4 \uBAA8\uB4DC',random:'\uB79C\uB364 \uC12E\uAE30',balanced:'\uD2F0\uC5B4 \uBC38\uB7F0\uC2A4',tier:'\uD2F0\uC5B4',noTier:'\uC5C6\uC74C',start:'\uC2DC\uC791!',result:'\uACB0\uACFC \uBC1C\uD45C!',team:'{n}\uD300',again:'\uB2E4\uC2DC\uD558\uAE30',drawing:'\uACF5 \uBD09\uB294 \uC911...',complete:'\uC644\uB8CC!',copied:'\uBCF5\uC0AC\uB428!'},
+gb:{title:'Team Picker',subtitle:'BUILD YOUR DREAM TEAM!',members:'Members',addMember:'Add Member',memberN:'Member {n}',teamOpt:'Team Options',teamCount:'Number of Teams',balance:'Balance Mode',random:'Random',balanced:'Tier Balanced',tier:'Tier',noTier:'None',start:'START!',result:'Results!',team:'Team {n}',again:'Again',drawing:'Drawing balls...',complete:'Complete!',copied:'Copied!'},
+ja:{title:'\u30C1\u30FC\u30E0\u5206\u3051',subtitle:'\u30C9\u30EA\u30FC\u30E0\u30C1\u30FC\u30E0\u3092\u4F5C\u308D\u3046\uFF01',members:'\u30E1\u30F3\u30D0\u30FC',addMember:'\u8FFD\u52A0',memberN:'\u30E1\u30F3\u30D0\u30FC{n}',teamOpt:'\u30C1\u30FC\u30E0\u8A2D\u5B9A',teamCount:'\u30C1\u30FC\u30E0\u6570',balance:'\u30D0\u30E9\u30F3\u30B9',random:'\u30E9\u30F3\u30C0\u30E0',balanced:'\u30C6\u30A3\u30A2\u30D0\u30E9\u30F3\u30B9',tier:'\u30C6\u30A3\u30A2',noTier:'\u306A\u3057',start:'\u30B9\u30BF\u30FC\u30C8\uFF01',result:'\u7D50\u679C\uFF01',team:'\u30C1\u30FC\u30E0{n}',again:'\u3082\u3046\u4E00\u5EA6',drawing:'\u62BD\u9078\u4E2D...',complete:'\u5B8C\u4E86\uFF01',copied:'\u30B3\u30D4\u30FC\uFF01'},
+zh:{title:'\u5206\u961F\u62BD\u7B7E',subtitle:'\u7EC4\u5EFA\u68A6\u60F3\u4E4B\u961F\uFF01',members:'\u6210\u5458',addMember:'\u6DFB\u52A0',memberN:'\u6210\u5458{n}',teamOpt:'\u961F\u4F0D\u8BBE\u7F6E',teamCount:'\u961F\u4F0D\u6570',balance:'\u5E73\u8861\u6A21\u5F0F',random:'\u968F\u673A',balanced:'\u7B49\u7EA7\u5E73\u8861',tier:'\u7B49\u7EA7',noTier:'\u65E0',start:'\u5F00\u59CB\uFF01',result:'\u7ED3\u679C\uFF01',team:'\u961F\u4F0D{n}',again:'\u518D\u6765',drawing:'\u62BD\u7403\u4E2D...',complete:'\u5B8C\u6210\uFF01',copied:'\u5DF2\u590D\u5236\uFF01'},
+es:{title:'Sorteo de Equipos',subtitle:'\u00A1ARMA TU EQUIPO IDEAL!',members:'Miembros',addMember:'A\u00F1adir',memberN:'Miembro {n}',teamOpt:'Config Equipos',teamCount:'N\u00BA Equipos',balance:'Balance',random:'Aleatorio',balanced:'Por Nivel',tier:'Nivel',noTier:'Sin',start:'\u00A1EMPEZAR!',result:'\u00A1Resultados!',team:'Equipo {n}',again:'Otra vez',drawing:'Sacando...',complete:'\u00A1Listo!',copied:'\u00A1Copiado!'},
+de:{title:'Team-Los',subtitle:'BAU DEIN TRAUMTEAM!',members:'Mitglieder',addMember:'Hinzuf\u00FCgen',memberN:'Mitglied {n}',teamOpt:'Team-Einstellungen',teamCount:'Teamanzahl',balance:'Balance',random:'Zuf\u00E4llig',balanced:'Tier-Balance',tier:'Tier',noTier:'Ohne',start:'START!',result:'Ergebnisse!',team:'Team {n}',again:'Nochmal',drawing:'Ziehe...',complete:'Fertig!',copied:'Kopiert!'},
+fr:{title:'Tirage d\'Equipes',subtitle:'CONSTRUIS TON EQUIPE DE REVE !',members:'Membres',addMember:'Ajouter',memberN:'Membre {n}',teamOpt:'Options \u00C9quipes',teamCount:'Nb \u00C9quipes',balance:'\u00C9quilibre',random:'Al\u00E9atoire',balanced:'Par Niveau',tier:'Niveau',noTier:'Aucun',start:'JOUER !',result:'R\u00E9sultats !',team:'\u00C9quipe {n}',again:'Rejouer',drawing:'Tirage...',complete:'Fini !',copied:'Copi\u00E9 !'},
+pt:{title:'Sorteio de Times',subtitle:'MONTE SEU TIME DOS SONHOS!',members:'Membros',addMember:'Adicionar',memberN:'Membro {n}',teamOpt:'Config Times',teamCount:'N\u00BA Times',balance:'Equil\u00EDbrio',random:'Aleat\u00F3rio',balanced:'Por N\u00EDvel',tier:'N\u00EDvel',noTier:'Sem',start:'INICIAR!',result:'Resultados!',team:'Time {n}',again:'De novo',drawing:'Sorteando...',complete:'Pronto!',copied:'Copiado!'},
+ru:{title:'\u0416\u0435\u0440\u0435\u0431\u044C\u0451\u0432\u043A\u0430',subtitle:'\u0421\u041E\u0411\u0415\u0420\u0418 \u041A\u041E\u041C\u0410\u041D\u0414\u0423 \u041C\u0415\u0427\u0422\u042B!',members:'\u0423\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u0438',addMember:'\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C',memberN:'\u0423\u0447\u0430\u0441\u0442\u043D\u0438\u043A {n}',teamOpt:'\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u043A\u043E\u043C\u0430\u043D\u0434',teamCount:'\u041A\u043E\u043B-\u0432\u043E \u043A\u043E\u043C\u0430\u043D\u0434',balance:'\u0411\u0430\u043B\u0430\u043D\u0441',random:'\u0421\u043B\u0443\u0447\u0430\u0439\u043D\u043E',balanced:'\u041F\u043E \u0443\u0440\u043E\u0432\u043D\u044E',tier:'\u0423\u0440\u043E\u0432\u0435\u043D\u044C',noTier:'\u0411\u0435\u0437',start:'\u0421\u0422\u0410\u0420\u0422!',result:'\u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u044B!',team:'\u041A\u043E\u043C\u0430\u043D\u0434\u0430 {n}',again:'\u0415\u0449\u0451 \u0440\u0430\u0437',drawing:'\u0422\u044F\u043D\u0435\u043C...',complete:'\u0413\u043E\u0442\u043E\u0432\u043E!',copied:'\u0421\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u043E!'},
+ar:{title:'\u0642\u0631\u0639\u0629 \u0627\u0644\u0641\u0631\u0642',subtitle:'\u0627\u0628\u0646\u0650 \u0641\u0631\u064A\u0642 \u0623\u062D\u0644\u0627\u0645\u0643!',members:'\u0627\u0644\u0623\u0639\u0636\u0627\u0621',addMember:'\u0625\u0636\u0627\u0641\u0629',memberN:'\u0639\u0636\u0648 {n}',teamOpt:'\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0641\u0631\u0642',teamCount:'\u0639\u062F\u062F \u0627\u0644\u0641\u0631\u0642',balance:'\u0627\u0644\u062A\u0648\u0627\u0632\u0646',random:'\u0639\u0634\u0648\u0627\u0626\u064A',balanced:'\u0645\u062A\u0648\u0627\u0632\u0646',tier:'\u0645\u0633\u062A\u0648\u0649',noTier:'\u0628\u062F\u0648\u0646',start:'\u0627\u0628\u062F\u0623!',result:'\u0627\u0644\u0646\u062A\u0627\u0626\u062C!',team:'\u0641\u0631\u064A\u0642 {n}',again:'\u0645\u0631\u0629 \u0623\u062E\u0631\u0649',drawing:'\u064A\u0633\u062D\u0628...',complete:'\u062A\u0645!',copied:'\u062A\u0645 \u0627\u0644\u0646\u0633\u062E!'},
+hi:{title:'\u091F\u0940\u092E \u091A\u0941\u0928\u093E\u0935',subtitle:'\u0905\u092A\u0928\u0940 \u0921\u094D\u0930\u0940\u092E \u091F\u0940\u092E \u092C\u0928\u093E\u0913!',members:'\u0938\u0926\u0938\u094D\u092F',addMember:'\u091C\u094B\u0921\u093C\u0947\u0902',memberN:'\u0938\u0926\u0938\u094D\u092F {n}',teamOpt:'\u091F\u0940\u092E \u0938\u0947\u091F\u093F\u0902\u0917',teamCount:'\u091F\u0940\u092E\u094B\u0902 \u0915\u0940 \u0938\u0902\u0916\u094D\u092F\u093E',balance:'\u092C\u0948\u0932\u0947\u0902\u0938',random:'\u0930\u0948\u0902\u0921\u092E',balanced:'\u091F\u093F\u092F\u0930 \u092C\u0948\u0932\u0947\u0902\u0938',tier:'\u091F\u093F\u092F\u0930',noTier:'\u092C\u093F\u0928\u093E',start:'\u0936\u0941\u0930\u0942!',result:'\u092A\u0930\u093F\u0923\u093E\u092E!',team:'\u091F\u0940\u092E {n}',again:'\u092B\u093F\u0930 \u0938\u0947',drawing:'\u0928\u093F\u0915\u093E\u0932 \u0930\u0939\u0947...',complete:'\u092A\u0942\u0930\u093E!',copied:'\u0915\u0949\u092A\u0940!'},
+th:{title:'\u0E08\u0E31\u0E1A\u0E17\u0E35\u0E21',subtitle:'\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E17\u0E35\u0E21\u0E43\u0E19\u0E1D\u0E31\u0E19!',members:'\u0E2A\u0E21\u0E32\u0E0A\u0E34\u0E01',addMember:'\u0E40\u0E1E\u0E34\u0E48\u0E21',memberN:'\u0E2A\u0E21\u0E32\u0E0A\u0E34\u0E01 {n}',teamOpt:'\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E17\u0E35\u0E21',teamCount:'\u0E08\u0E33\u0E19\u0E27\u0E19\u0E17\u0E35\u0E21',balance:'\u0E2A\u0E21\u0E14\u0E38\u0E25',random:'\u0E2A\u0E38\u0E48\u0E21',balanced:'\u0E15\u0E32\u0E21\u0E23\u0E30\u0E14\u0E31\u0E1A',tier:'\u0E23\u0E30\u0E14\u0E31\u0E1A',noTier:'\u0E44\u0E21\u0E48\u0E21\u0E35',start:'\u0E40\u0E23\u0E34\u0E48\u0E21!',result:'\u0E1C\u0E25\u0E25\u0E31\u0E1E\u0E18\u0E4C!',team:'\u0E17\u0E35\u0E21 {n}',again:'\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07',drawing:'\u0E01\u0E33\u0E25\u0E31\u0E07\u0E08\u0E31\u0E1A...',complete:'\u0E40\u0E2A\u0E23\u0E47\u0E08!',copied:'\u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01\u0E41\u0E25\u0E49\u0E27!'},
+id:{title:'Undi Tim',subtitle:'BANGUN TIM IMPIANMU!',members:'Anggota',addMember:'Tambah',memberN:'Anggota {n}',teamOpt:'Pengaturan Tim',teamCount:'Jumlah Tim',balance:'Keseimbangan',random:'Acak',balanced:'Seimbang',tier:'Tier',noTier:'Tanpa',start:'MULAI!',result:'Hasil!',team:'Tim {n}',again:'Lagi',drawing:'Mengambil...',complete:'Selesai!',copied:'Disalin!'},
+vi:{title:'B\u1ED1c Th\u0103m \u0110\u1ED9i',subtitle:'X\u00C2Y D\u1EF0NG \u0110\u1ED8I M\u01A0!',members:'Th\u00E0nh vi\u00EAn',addMember:'Th\u00EAm',memberN:'Th\u00E0nh vi\u00EAn {n}',teamOpt:'C\u00E0i \u0111\u1EB7t \u0111\u1ED9i',teamCount:'S\u1ED1 \u0111\u1ED9i',balance:'C\u00E2n b\u1EB1ng',random:'Ng\u1EABu nhi\u00EAn',balanced:'Theo c\u1EA5p',tier:'C\u1EA5p',noTier:'Kh\u00F4ng',start:'B\u1EAFT \u0110\u1EA6U!',result:'K\u1EBFt qu\u1EA3!',team:'\u0110\u1ED9i {n}',again:'L\u1EA1i',drawing:'\u0110ang r\u00FAt...',complete:'Xong!',copied:'\u0110\u00E3 sao ch\u00E9p!'},
+tr:{title:'Tak\u0131m \u00C7ekili\u015Fi',subtitle:'HAYAL TAKIMINI KUR!',members:'\u00DCyeler',addMember:'Ekle',memberN:'\u00DCye {n}',teamOpt:'Tak\u0131m Ayarlar\u0131',teamCount:'Tak\u0131m Say\u0131s\u0131',balance:'Denge',random:'Rastgele',balanced:'Seviye Dengeli',tier:'Seviye',noTier:'Yok',start:'BA\u015ELA!',result:'Sonu\u00E7lar!',team:'Tak\u0131m {n}',again:'Tekrar',drawing:'\u00C7ekiliyor...',complete:'Tamam!',copied:'Kopyaland\u0131!'}
 };
 let lang='en';
 function T(k,v){let s=(I18N[lang]&&I18N[lang][k])||I18N.en[k]||k;if(v)Object.keys(v).forEach(x=>{s=s.replace('{'+x+'}',v[x])});return s}
 
 const BALL_COLORS=['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393','#00bcd4','#ff6b81','#a29bfe','#fd79a8','#00cec9','#fab1a0','#74b9ff','#55efc4','#fdcb6e','#6c5ce7','#ff7675','#636e72'];
 
-/* Country lotto presets: {flag, name, start, end, draw} */
-const LOTTO_PRESETS=[
-    {id:'kr',flag:'\uD83C\uDDF0\uD83C\uDDF7',name:'Lotto 6/45',start:1,end:45,draw:6,langs:['ko']},
-    {id:'us',flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Powerball',start:1,end:69,draw:5,langs:['en']},
-    {id:'gb',flag:'\uD83C\uDDEC\uD83C\uDDE7',name:'UK Lotto',start:1,end:59,draw:6,langs:['gb']},
-    {id:'jp',flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Loto 6',start:1,end:43,draw:6,langs:['ja']},
-    {id:'cn',flag:'\uD83C\uDDE8\uD83C\uDDF3',name:'\u53CC\u8272\u7403',start:1,end:33,draw:6,langs:['zh']},
-    {id:'es',flag:'\uD83C\uDDEA\uD83C\uDDF8',name:'La Primitiva',start:1,end:49,draw:6,langs:['es']},
-    {id:'de',flag:'\uD83C\uDDE9\uD83C\uDDEA',name:'Lotto 6/49',start:1,end:49,draw:6,langs:['de']},
-    {id:'fr',flag:'\uD83C\uDDEB\uD83C\uDDF7',name:'Loto',start:1,end:49,draw:5,langs:['fr']},
-    {id:'br',flag:'\uD83C\uDDE7\uD83C\uDDF7',name:'Mega-Sena',start:1,end:60,draw:6,langs:['pt']},
-    {id:'ru',flag:'\uD83C\uDDF7\uD83C\uDDFA',name:'\u0413\u043E\u0441\u043B\u043E\u0442\u043E 6/45',start:1,end:45,draw:6,langs:['ru']},
-    {id:'tr',flag:'\uD83C\uDDF9\uD83C\uDDF7',name:'Say\u0131sal Loto',start:1,end:49,draw:6,langs:['tr']},
-    {id:'th',flag:'\uD83C\uDDF9\uD83C\uDDED',name:'Thai Lottery',start:1,end:99,draw:6,langs:['th']},
-    {id:'vn',flag:'\uD83C\uDDFB\uD83C\uDDF3',name:'Vietlott 6/45',start:1,end:45,draw:6,langs:['vi']},
-    {id:'in',flag:'\uD83C\uDDEE\uD83C\uDDF3',name:'Lotto India',start:1,end:50,draw:6,langs:['hi']},
-    {id:'id',flag:'\uD83C\uDDEE\uD83C\uDDE9',name:'Togel',start:1,end:45,draw:6,langs:['id']},
-    {id:'sa',flag:'\uD83C\uDDF8\uD83C\uDDE6',name:'Emirates Loto',start:1,end:49,draw:6,langs:['ar']}
-];
-
-let drawnResults=[];
+let memberCount=6,teamCount=2,balanceMode='random';
+let members=[],drawnResults=[],teamResults=[];
 
 /* Audio */
 const SFX=(()=>{let c;function g(){if(!c)c=new(window.AudioContext||window.webkitAudioContext)();return c}
@@ -229,57 +219,53 @@ return{pop(){p(800,.08,'sine',.15);noise(.03,.08)},whoosh(){noise(.15,.04)},fanf
 function createStars(){const c=document.getElementById('starsContainer');for(let i=0;i<50;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*2.5+.5;s.style.cssText=`width:${z}px;height:${z}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s`;c.appendChild(s)}}
 
 /* Setup */
+function renderMembers(){
+    const c=document.getElementById('memberInputs');
+    const existing=[...c.querySelectorAll('input')].map(inp=>inp.value);
+    const existingTiers=[...c.querySelectorAll('select')].map(s=>s.value);
+    c.innerHTML='';
+    for(let i=0;i<memberCount;i++){
+        const r=document.createElement('div');r.className='member-row';
+        r.innerHTML=`<input type="text" placeholder="${T('memberN',{n:i+1})}" maxlength="20">
+        <select><option value="0">${T('noTier')}</option><option value="1">T1</option><option value="2">T2</option><option value="3">T3</option></select>
+        <button class="rm-btn">&times;</button>`;
+        c.appendChild(r);
+    }
+    c.querySelectorAll('input').forEach((inp,i)=>{if(existing[i])inp.value=existing[i]});
+    c.querySelectorAll('select').forEach((s,i)=>{if(existingTiers[i])s.value=existingTiers[i]});
+    c.querySelectorAll('.rm-btn').forEach(b=>b.addEventListener('click',()=>{if(memberCount<=2)return;memberCount--;renderMembers()}));
+}
+
 function applyLanguage(){
     document.getElementById('titleText').textContent=T('title');
     document.getElementById('subtitleText').textContent=T('subtitle');
-    document.getElementById('lottoOptTitle').textContent=T('lottoOpt');
-    document.getElementById('presetLabel').textContent=T('preset')||'Country Lotto Preset';
-    document.getElementById('rangeLabel').textContent=T('range');
-    document.getElementById('drawCountLabel').textContent=T('drawCount');
-    document.getElementById('ballsText').textContent=T('balls');
+    document.getElementById('membersTitle').textContent=T('members');
+    document.getElementById('addMemberText').textContent=T('addMember');
+    document.getElementById('teamOptTitle').textContent=T('teamOpt');
+    document.getElementById('teamCountLabel').textContent=T('teamCount');
+    document.getElementById('balanceLabel').textContent=T('balance');
+    document.getElementById('balRandom').textContent=T('random');
+    document.getElementById('balBalanced').textContent=T('balanced');
     document.getElementById('startBtn').textContent=T('start');
     document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
-    renderLottoPresets();
+    renderMembers();
 }
 
-function renderLottoPresets(){
-    const row=document.getElementById('lottoPresetRow');
-    // Find which preset matches current language
-    const defaultPreset=LOTTO_PRESETS.find(p=>p.langs.includes(lang))||LOTTO_PRESETS[0];
-    // Sort: matching language first, then rest
-    const sorted=[defaultPreset,...LOTTO_PRESETS.filter(p=>p!==defaultPreset)];
-
-    row.innerHTML=sorted.map(p=>{
-        const sel=p===defaultPreset?'selected':'';
-        return `<div class="opt-chip ${sel}" data-preset="${p.id}" style="font-size:.72em;padding:5px 10px">${p.flag} ${p.name}<span style="color:rgba(255,255,255,.35);margin-left:4px;font-size:.85em">${p.start}-${p.end}/${p.draw}</span></div>`;
-    }).join('');
-
-    // Apply default preset values
-    applyLottoPreset(defaultPreset);
-
-    // Click handler
-    row.querySelectorAll('.opt-chip').forEach(chip=>{
-        chip.addEventListener('click',()=>{
-            row.querySelectorAll('.opt-chip').forEach(c=>c.classList.remove('selected'));
-            chip.classList.add('selected');
-            const preset=LOTTO_PRESETS.find(p=>p.id===chip.dataset.preset);
-            if(preset)applyLottoPreset(preset);
-            SFX.click();
-        });
+function collectMembers(){
+    const rows=document.querySelectorAll('#memberInputs .member-row');
+    members=[];
+    rows.forEach((r,i)=>{
+        const name=r.querySelector('input').value.trim()||T('memberN',{n:i+1});
+        const tier=parseInt(r.querySelector('select').value);
+        members.push({name,tier,idx:i});
     });
 }
 
-function applyLottoPreset(preset){
-    document.getElementById('numStart').value=preset.start;
-    document.getElementById('numEnd').value=preset.end;
-    document.getElementById('drawCount').value=preset.draw;
-}
-
 /* ============================================
-   CANVAS PHYSICS - LOTTO MACHINE
+   CANVAS PHYSICS - BALL MACHINE
 ============================================ */
 let canvas,ctx,dpr,W,H,animId;
-let balls=[],drawnBalls=[],drawing=false,drawQueue=[],currentDrawn=0;
+let balls=[],drawnBalls=[],drawing=false,currentDrawn=0;
 
 // Ball physics
 const GRAVITY=600,BOUNCE=.7,FRICTION=.99,BALL_R=18;
@@ -403,12 +389,12 @@ function drawBall(x,y,r,color,label,highlight=false){
     hl.addColorStop(1,'rgba(255,255,255,0)');
     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=hl;ctx.fill();
 
-    // White circle for number
+    // White circle for label
     if(label!==undefined){
         const cr=r*.55;
         ctx.beginPath();ctx.arc(x,y+r*.05,cr,0,Math.PI*2);
         ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
-        // Number text
+        // Label text
         const fs=Math.min(r*.7,cr*1.2);
         ctx.font=`900 ${fs}px 'Orbitron',sans-serif`;
         ctx.fillStyle='#222';ctx.textAlign='center';ctx.textBaseline='middle';
@@ -433,6 +419,7 @@ function drawMachine(){
 
     // === STAND / PEDESTAL ===
     ctx.save();
+    // Vertical stand pole
     const poleW=16;
     const poleTop=my+mr+5;const poleBot=trayY+10;
     const poleGrad=ctx.createLinearGradient(mx-poleW,0,mx+poleW,0);
@@ -511,7 +498,7 @@ function drawGlassOverlay(){
     ctx.restore();
 }
 
-function drawSingleTray(tx,ty,slots){
+function drawSingleTray(tx,ty,slots,teamColor,teamLabel){
     const gap=BALL_R*2.4;
     const trayW=Math.max(slots,1)*gap+20;
     const trayH=BALL_R*2+14;
@@ -551,79 +538,64 @@ function drawSingleTray(tx,ty,slots){
     ctx.strokeStyle='rgba(0,0,0,.12)';ctx.lineWidth=1;
     for(let i=1;i<slots;i++){const sx=tx+10+i*gap;ctx.beginPath();ctx.moveTo(sx,ty+3);ctx.lineTo(sx,ty+trayH-3);ctx.stroke()}
 
+    // Team label above tray
+    if(teamLabel){
+        ctx.fillStyle=teamColor||'#fff';
+        ctx.font=`bold ${Math.min(12,gap*.35)}px 'Orbitron',sans-serif`;
+        ctx.textAlign='center';
+        ctx.fillText(teamLabel,tx+trayW/2,ty-6);
+    }
     ctx.restore();
     return{tx:tx+10,gap};
 }
 
 function drawWoodenTray(){
-    // Single tray for lotto mode
-    const total=drawQueue?drawQueue.length:6;
+    // Multiple trays for teams
+    const maxPerTeam=Math.ceil(members.length/teamCount);
     const gap=BALL_R*2.4;
-    const trayW=total*gap+20;
-    const tx=machineX-trayW/2;
-    const ty=trayY-BALL_R-4;
-    drawSingleTray(tx,ty,total);
-}
+    const trayW=maxPerTeam*gap+20;
+    const totalW=teamTrays.length*trayW+(teamTrays.length-1)*12;
+    let startX=machineX-totalW/2;
 
-function drawDrawnBalls(){
-    // Lotto mode: single tray
-    const total=drawQueue?drawQueue.length:6;
-    const gap=BALL_R*2.4;
-    const trayW=total*gap+20;
-    const tx=machineX-trayW/2+10;
-
-    drawnBalls.forEach((b,i)=>{
-        const targetX=tx+i*gap+gap/2;
-        const targetY=trayY;
-
-        if(b.exitAnim<1){
-            b.exitAnim=Math.min(1,b.exitAnim+.018);
-            const t=b.exitAnim;
-            if(t<.4){
-                const p=t/.4;b.dispX=exitX;b.dispY=exitY+(trayY-exitY)*p*p;
-            }else{
-                const p=(t-.4)/.6;const ease=1-Math.pow(1-p,2);
-                b.dispX=exitX+(targetX-exitX)*ease;b.dispY=trayY-Math.sin(p*Math.PI)*8;
-            }
-        }else{b.dispX=targetX;b.dispY=targetY}
-        drawBall(b.dispX,b.dispY,BALL_R+1,b.color,b.label,true);
+    teamTrays.forEach((tray,i)=>{
+        const tx=startX+i*(trayW+12);
+        const ty=trayY-BALL_R-4;
+        drawSingleTray(tx,ty,maxPerTeam,tray.color,tray.label);
     });
 }
 
-/* Draw sequence */
-function startDrawSequence(labels,colors,count){
-    drawnBalls=[];currentDrawn=0;drawing=true;
-    drawQueue=[];
-    // Pick random indices
-    const indices=[...Array(labels.length).keys()];
-    for(let i=indices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indices[i],indices[j]]=[indices[j],indices[i]]}
-    for(let i=0;i<Math.min(count,labels.length);i++)drawQueue.push(indices[i]);
-    // Schedule draws
-    drawNext();
-}
+function drawDrawnBalls(){
+    // Draw balls into team trays
+    const maxPerTeam=Math.ceil(members.length/teamCount);
+    const gap=BALL_R*2.4;
+    const trayW=maxPerTeam*gap+20;
+    const totalW=teamTrays.length*trayW+(teamTrays.length-1)*12;
+    const startX=machineX-totalW/2;
 
-function drawNext(){
-    if(currentDrawn>=drawQueue.length){
-        drawing=false;gateOpen=false;
-        setTimeout(()=>{SFX.fanfare();setTimeout(showResult,1500)},500);
-        return;
-    }
-    const idx=drawQueue[currentDrawn];
-    // Open gate -> draw ball -> close gate
-    gateOpen=true;
-    setTimeout(()=>{
-        const b=balls[idx];
-        b.drawn=true;
-        SFX.pop();
-        drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY});
-        drawnResults.push({label:b.label,color:b.color,idx});
-        currentDrawn++;
-        // Close gate after ball exits
-        setTimeout(()=>{
-            gateOpen=false;
-            setTimeout(drawNext,600);
-        },500);
-    },600+Math.random()*300);
+    teamTrays.forEach((tray,ti)=>{
+        const trayX=startX+ti*(trayW+12)+10;
+        tray.balls.forEach((b,si)=>{
+            const targetX=trayX+si*gap+gap/2;
+            const targetY=trayY;
+
+            if(b.exitAnim<1){
+                b.exitAnim=Math.min(1,b.exitAnim+.02);
+                const t=b.exitAnim;
+                if(t<.35){
+                    const p=t/.35;
+                    b.dispX=exitX;b.dispY=exitY+(targetY-exitY)*p*p;
+                }else{
+                    const p=(t-.35)/.65;
+                    const ease=1-Math.pow(1-p,2);
+                    b.dispX=exitX+(targetX-exitX)*ease;
+                    b.dispY=targetY-Math.sin(p*Math.PI)*10;
+                }
+            }else{
+                b.dispX=targetX;b.dispY=targetY;
+            }
+            drawBall(b.dispX,b.dispY,BALL_R+1,b.color,b.label,true);
+        });
+    });
 }
 
 /* Main loop */
@@ -662,7 +634,7 @@ function loop(ts){
     if(drawing){
         ctx.fillStyle='rgba(255,230,109,.8)';ctx.font='bold 14px "Noto Sans KR",sans-serif';
         ctx.textAlign='center';ctx.fillText(T('drawing'),W/2,H-30);
-    }else if(drawnBalls.length>0){
+    }else if(drawnBalls.length>0||teamTrays.some(t=>t.balls.length>0)){
         ctx.fillStyle='rgba(0,255,136,.8)';ctx.font='bold 14px "Noto Sans KR",sans-serif';
         ctx.textAlign='center';ctx.fillText(T('complete'),W/2,H-30);
     }
@@ -671,25 +643,114 @@ function loop(ts){
 }
 
 /* ============================================
-   LOTTO NUMBER DRAW
+   TEAM BUILDER
 ============================================ */
-function startLottoDraw(){
-    const start=parseInt(document.getElementById('numStart').value)||1;
-    const end=parseInt(document.getElementById('numEnd').value)||45;
-    const count=parseInt(document.getElementById('drawCount').value)||6;
-    const range=Math.max(end,start)-Math.min(end,start)+1;
-    const lo=Math.min(start,end);
+let teamTrays=[];// [{label,color,members:[{name,tier,ballIdx}]}]
+let teamDrawQueue=[];// ordered draw: [{ballIdx, teamIdx}]
+let teamDrawCurrent=0;
+const TEAM_COLORS=['#e74c3c','#3498db','#2ecc71','#f1c40f'];
 
-    const allNums=[];for(let i=0;i<range;i++)allNums.push(lo+i);
-    const colors=allNums.map((_,i)=>BALL_COLORS[i%BALL_COLORS.length]);
+function buildTeams(){
+    collectMembers();
+    const n=members.length;
+
+    // Build teams
+    let assignment;// array of {member, teamIdx}
+    if(balanceMode==='balanced'){
+        // Group by tier, then snake draft each tier group
+        const tierGroups={};
+        members.forEach((m,i)=>{const t=m.tier||0;if(!tierGroups[t])tierGroups[t]=[];tierGroups[t].push({...m,origIdx:i})});
+        const tiers=Object.keys(tierGroups).sort((a,b)=>(+a||99)-(+b||99));
+        const teams=Array.from({length:teamCount},()=>[]);
+        let dir=1,col=0;
+        for(const tier of tiers){
+            // Shuffle within tier
+            const group=tierGroups[tier];
+            for(let i=group.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[group[i],group[j]]=[group[j],group[i]]}
+            for(const m of group){
+                teams[col].push(m);
+                col+=dir;
+                if(col>=teamCount){dir=-1;col=teamCount-1}
+                else if(col<0){dir=1;col=0}
+            }
+        }
+        assignment=[];
+        teams.forEach((team,ti)=>team.forEach(m=>assignment.push({member:m,teamIdx:ti})));
+    }else{
+        // Full random shuffle then round-robin
+        const shuffled=[...members.map((m,i)=>({...m,origIdx:i}))];
+        for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]}
+        assignment=shuffled.map((m,i)=>({member:m,teamIdx:i%teamCount}));
+    }
+
+    // Build teamResults for result screen
+    const teams=Array.from({length:teamCount},()=>[]);
+    assignment.forEach(a=>teams[a.teamIdx].push(a.member));
+    teamResults=teams;
+
+    // Build team trays info
+    teamTrays=[];
+    for(let t=0;t<teamCount;t++){
+        teamTrays.push({
+            label:T('team',{n:t+1}),
+            color:TEAM_COLORS[t%TEAM_COLORS.length],
+            balls:[]// filled as drawn
+        });
+    }
+
+    // Create balls (use member colors matching team)
+    const labels=members.map(m=>m.name.substring(0,3));
+    const colors=members.map((_,i)=>TEAM_COLORS[assignment.find(a=>a.member.origIdx===i)?.teamIdx||0]);
 
     document.getElementById('setupWrap').style.display='none';
     document.getElementById('gameScreen').style.display='block';
     initCanvas();
-    createBalls(allNums,colors);
+    createBalls(labels,colors);
     drawnResults=[];drawnBalls=[];
+
+    // Build draw queue
+    if(balanceMode==='balanced'){
+        const tierOrder={};
+        assignment.forEach(a=>{const t=a.member.tier||0;if(!tierOrder[t])tierOrder[t]=[];tierOrder[t].push(a)});
+        const tiers=Object.keys(tierOrder).sort((a,b)=>(+a||99)-(+b||99));
+        teamDrawQueue=[];
+        for(const tier of tiers){
+            const group=tierOrder[tier];
+            for(let i=group.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[group[i],group[j]]=[group[j],group[i]]}
+            group.forEach(a=>teamDrawQueue.push({ballIdx:a.member.origIdx,teamIdx:a.teamIdx,tier:a.member.tier}));
+        }
+    }else{
+        teamDrawQueue=[];
+        const shuffledA=[...assignment];
+        for(let i=shuffledA.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffledA[i],shuffledA[j]]=[shuffledA[j],shuffledA[i]]}
+        shuffledA.forEach(a=>teamDrawQueue.push({ballIdx:a.member.origIdx,teamIdx:a.teamIdx,tier:a.member.tier}));
+    }
+
+    teamDrawCurrent=0;drawing=true;gateOpen=false;
     lastTime=0;animId=requestAnimationFrame(loop);
-    startDrawSequence(allNums,colors,Math.min(count,range));
+    drawNextTeam();
+}
+
+function drawNextTeam(){
+    if(teamDrawCurrent>=teamDrawQueue.length){
+        drawing=false;gateOpen=false;
+        setTimeout(()=>{SFX.fanfare();setTimeout(showResult,1500)},500);
+        return;
+    }
+    const item=teamDrawQueue[teamDrawCurrent];
+    gateOpen=true;
+    setTimeout(()=>{
+        const b=balls[item.ballIdx];
+        b.drawn=true;
+        SFX.pop();
+        const slotIdx=teamTrays[item.teamIdx].balls.length;
+        teamTrays[item.teamIdx].balls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,slotIdx});
+        teamDrawCurrent++;
+        setTimeout(()=>{
+            gateOpen=false;
+            setTimeout(drawNextTeam,500);
+        },400);
+    },500+Math.random()*200);
 }
 
 /* Result */
@@ -697,20 +758,27 @@ function showResult(){
     if(animId)cancelAnimationFrame(animId);
     document.getElementById('gameScreen').style.display='none';
     document.getElementById('resultScreen').style.display='flex';
-    document.getElementById('resultH1').textContent='\uD83C\uDFB1 '+T('result');
+    document.getElementById('resultH1').textContent='\uD83D\uDC65 '+T('result');
     startConfetti();SFX.fanfare();
 
     const rc=document.getElementById('resultContent');
-    const sorted=[...drawnResults].sort((a,b)=>a.label-b.label);
-    rc.innerHTML=`<div class="drawn-balls">${sorted.map(b=>`<div class="drawn-ball" style="background:${b.color}">${b.label}</div>`).join('')}</div>`;
-    buildShareBtns('Numbers: '+sorted.map(b=>b.label).join(', '));
+    const teamColors=['#e74c3c','#3498db','#2ecc71','#f1c40f'];
+    rc.innerHTML=teamResults.map((team,i)=>{
+        const tc=teamColors[i%teamColors.length];
+        const membersHtml=team.map(m=>{
+            const tierBadge=m.tier?`<span class="tier-badge" style="background:rgba(255,255,255,.1)">T${m.tier}</span>`:'';
+            return `<span class="team-member">${m.name}${tierBadge}</span>`;
+        }).join('');
+        return `<div class="team-block" style="border-color:${tc}"><h4 style="color:${tc}">\uD83C\uDFC6 ${T('team',{n:i+1})}</h4>${membersHtml}</div>`;
+    }).join('');
+    buildShareBtns(teamResults.map((team,i)=>`${T('team',{n:i+1})}: ${team.map(m=>m.name).join(', ')}`).join('\n'));
 }
 
 function buildShareBtns(text){
-    const full=`NotMePlz Lotto \uD83C\uDFB1\n${text}\nhttps://notmeplz.com/games/lotto/`;
-    const enc=encodeURIComponent(full);const eu=encodeURIComponent('https://notmeplz.com/games/lotto/');
+    const full=`NotMePlz Team Builder \uD83D\uDC65\n${text}\nhttps://notmeplz.com/games/team/`;
+    const enc=encodeURIComponent(full);const eu=encodeURIComponent('https://notmeplz.com/games/team/');
     let h=`<button class="share-btn kakao" onclick="copyS()">\uD83D\uDCAC Kakao</button><button class="share-btn whatsapp" onclick="window.open('https://wa.me/?text=${enc}')">\uD83D\uDCAC WhatsApp</button><button class="share-btn telegram" onclick="window.open('https://t.me/share/url?url=${eu}&text=${enc}')">\u2708\uFE0F Telegram</button><button class="share-btn twitter" onclick="window.open('https://twitter.com/intent/tweet?text=${enc}')">\uD83D\uDC26 X</button><button class="share-btn copy-link" onclick="copyS()">\uD83D\uDD17 Copy</button>`;
-    if(navigator.share)h+=`<button class="share-btn native-share" style="display:flex" onclick="navigator.share({title:'NotMePlz Lotto',text:window._st,url:'https://notmeplz.com/games/lotto/'}).catch(()=>{})">\uD83D\uDCE4 Share</button>`;
+    if(navigator.share)h+=`<button class="share-btn native-share" style="display:flex" onclick="navigator.share({title:'NotMePlz Team Builder',text:window._st,url:'https://notmeplz.com/games/team/'}).catch(()=>{})">\uD83D\uDCE4 Share</button>`;
     document.getElementById('shareButtons').innerHTML=h;window._st=full;
 }
 function copyS(){navigator.clipboard.writeText(window._st).then(()=>{const t=document.getElementById('shareToast');t.textContent=T('copied');t.style.display='block';setTimeout(()=>t.style.display='none',2000)})}
@@ -729,7 +797,13 @@ function init(){
 
     document.getElementById('langBar').addEventListener('click',e=>{const b=e.target.closest('.lang-btn');if(!b)return;lang=b.dataset.lang;localStorage.setItem('gloryCarRacing_lang',lang);applyLanguage()});
 
-    document.getElementById('startBtn').addEventListener('click',()=>{SFX.g();startLottoDraw()});
+    document.getElementById('addMemberBtn').addEventListener('click',()=>{if(memberCount>=20)return;memberCount++;renderMembers()});
+
+    document.getElementById('teamCountRow').addEventListener('click',e=>{const c=e.target.closest('.opt-chip');if(!c)return;document.querySelectorAll('#teamCountRow .opt-chip').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');teamCount=parseInt(c.dataset.tc);SFX.click()});
+
+    document.getElementById('balanceRow').addEventListener('click',e=>{const c=e.target.closest('.opt-chip');if(!c)return;document.querySelectorAll('#balanceRow .opt-chip').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');balanceMode=c.dataset.bal;SFX.click()});
+
+    document.getElementById('startBtn').addEventListener('click',()=>{SFX.g();buildTeams()});
 
     document.getElementById('replayBtn').addEventListener('click',()=>{
         if(animId)cancelAnimationFrame(animId);
@@ -737,7 +811,7 @@ function init(){
         document.getElementById('resultScreen').style.display='none';
         document.getElementById('gameScreen').style.display='none';
         document.getElementById('setupWrap').style.display='flex';
-        drawnResults=[];drawnBalls=[];balls=[];
+        drawnResults=[];drawnBalls=[];balls=[];teamTrays=[];
     });
 
     window.addEventListener('resize',()=>{if(document.getElementById('gameScreen').style.display==='block')resizeCanvas()});
