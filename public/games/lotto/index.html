@@ -11,6 +11,7 @@
     <meta name="theme-color" content="#FF6B35">
     <link rel="apple-touch-icon" href="/assets/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-W91WWVNLD6"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-W91WWVNLD6');</script>
     <style>
@@ -320,14 +321,47 @@ function applyLottoPreset(preset){
 let canvas,ctx,dpr,W,H,animId;
 let balls=[],drawnBalls=[],drawing=false,drawQueue=[],currentDrawn=0;
 
-// Ball physics
-const GRAVITY=220,BOUNCE=.8,FRICTION=.993,BALL_R=15;
-// Machine dimensions (computed on resize)
+const BALL_R=14;
 let machineX,machineY,machineR,exitX,exitY,exitR;
+
+/* ============================================
+   MATTER.JS PHYSICS ENGINE
+============================================ */
+const{Engine,World,Bodies,Body,Composite,Vector,Events}=Matter;
+let engine,world,wallSegments=[];
+
+function initPhysics(){
+    engine=Engine.create({gravity:{x:0,y:1.2}});// realistic gravity
+    world=engine.world;
+}
+
+function buildWalls(){
+    // Remove old walls
+    wallSegments.forEach(w=>Composite.remove(world,w));
+    wallSegments=[];
+    // Create circular boundary from many small static segments
+    const segs=48;
+    const thick=20;
+    for(let i=0;i<segs;i++){
+        const a1=(i/segs)*Math.PI*2;
+        const a2=((i+1)/segs)*Math.PI*2;
+        const mx=machineX+Math.cos((a1+a2)/2)*(machineR+thick/2);
+        const my=machineY+Math.sin((a1+a2)/2)*(machineR+thick/2);
+        const len=2*machineR*Math.sin(Math.PI/segs)+4;
+        const seg=Bodies.rectangle(mx,my,len,thick,{
+            isStatic:true,angle:(a1+a2)/2+Math.PI/2,
+            restitution:0.6,friction:0.1
+        });
+        wallSegments.push(seg);
+    }
+    Composite.add(world,wallSegments);
+}
 
 function initCanvas(){
     canvas=document.getElementById('gameCanvas');ctx=canvas.getContext('2d');
-    dpr=window.devicePixelRatio||1;resizeCanvas();
+    dpr=window.devicePixelRatio||1;
+    initPhysics();
+    resizeCanvas();
 }
 
 function resizeCanvas(){
@@ -337,27 +371,38 @@ function resizeCanvas(){
     ctx.setTransform(dpr,0,0,dpr,0,0);
     machineR=Math.min(W*.42,H*.33,220);
     machineX=W/2;machineY=H*.35;
-    // Gate at bottom center of globe
     exitX=machineX;exitY=machineY+machineR+BALL_R+8;exitR=BALL_R+4;
-    // Tray position (wooden rack below gate)
     trayY=exitY+BALL_R+30;
     trayStartX=W/2;
+    buildWalls();
 }
 let trayY=0,trayStartX=0,gateOpen=false,gateAnim=0;
 
 function createBalls(labels,colors){
+    // Remove old ball bodies from world
+    balls.forEach(b=>{if(b.body)Composite.remove(world,b.body)});
     balls=[];
     const n=labels.length;
     for(let i=0;i<n;i++){
         const angle=Math.random()*Math.PI*2;
-        const dist=Math.random()*machineR*.75;
+        const dist=Math.random()*machineR*.6;
+        const x=machineX+Math.cos(angle)*dist;
+        const y=machineY+Math.sin(angle)*dist;
+        // Matter.js circle body
+        const body=Bodies.circle(x,y,BALL_R,{
+            restitution:0.7,      // bouncy plastic
+            friction:0.05,        // low friction
+            frictionAir:0.008,    // light air drag
+            density:0.0008,       // hollow plastic ball = very light
+        });
+        // Give initial random velocity
+        Body.setVelocity(body,{x:(Math.random()-.5)*8,y:(Math.random()-.5)*8});
+        Composite.add(world,body);
+
         balls.push({
-            x:machineX+Math.cos(angle)*dist,
-            y:machineY+Math.sin(angle)*dist,
-            vx:(Math.random()-.5)*200,
-            vy:(Math.random()-.5)*200,
-            z:Math.random()*2-1,// -1 to 1: depth (front to back)
-            vz:(Math.random()-.5)*3,// z velocity
+            body,
+            z:Math.random()*2-1,
+            vz:(Math.random()-.5)*2,
             r:BALL_R,
             label:labels[i],
             color:colors[i%colors.length],
@@ -367,118 +412,84 @@ function createBalls(labels,colors){
     }
 }
 
-function updateBalls(dt){
+/* Apply wind/blower forces each frame */
+function applyWindForces(){
     const t=performance.now()*.001;
 
-    /* ============================================
-       REAL LOTTO MACHINE PHYSICS
-       - Air jets blast upward from bottom at random intervals
-       - Balls collide chaotically, no uniform rotation
-       - Intermittent bursts scatter balls everywhere
-       - Balls rise, fall, bounce off walls and each other
-    ============================================ */
-
-    // Intermittent air bursts (every ~2-4 seconds, random direction)
+    // Burst cycle: strong blast every ~2.5s
     const burstCycle=Math.floor(t/2.5);
-    const burstPhase=(t%2.5)/2.5;// 0-1 within each burst cycle
-    const burstActive=burstPhase<0.4;// burst for 40% of cycle
-    const burstAngle=burstCycle*7.31;// pseudo-random angle per burst
-    const burstStr=burstActive?180+Math.sin(burstCycle*3.7)*60:0;
+    const burstPhase=(t%2.5)/2.5;
+    const burstActive=burstPhase<0.35;
+    const burstAngle=burstCycle*7.31;
+    const burstMag=burstActive?0.012+Math.sin(burstCycle*3.7)*0.004:0;
 
     for(const b of balls){
-        if(b.drawn)continue;
+        if(b.drawn||!b.body)continue;
+        const pos=b.body.position;
+        const vertPos=(pos.y-machineY)/machineR;// -1=top, +1=bottom
 
-        const bx=b.x-machineX,by=b.y-machineY;
-        const bDist=Math.sqrt(bx*bx+by*by);
-        const normR=bDist/machineR;
+        // 1) Bottom air jet: strong upward force, stronger for lower balls
+        const lift=Math.max(0,vertPos+0.1)*0.018;
+        Body.applyForce(b.body,pos,{x:0,y:-lift});
 
-        // 1) Gravity
-        b.vy+=GRAVITY*dt;
+        // 2) Random sideways turbulence per ball
+        const seed=b.label*7.13;
+        const turbX=Math.sin(t*3.5+seed)*0.003;
+        const turbY=Math.cos(t*2.9+seed*1.3)*0.002;
+        Body.applyForce(b.body,pos,{x:turbX,y:turbY});
 
-        // 2) Strong bottom air jets — balls shoot upward
-        const vertPos=(b.y-machineY)/machineR;
-        const liftStr=Math.max(0,vertPos+0.1)*400;// MUCH stronger lift
-        b.vy-=liftStr*dt;
-        // Random sideways from blower
-        b.vx+=Math.sin(t*4+b.label*2)*liftStr*0.4*dt;
-
-        // 3) Powerful intermittent bursts — scatter balls everywhere
+        // 3) Burst: powerful random kick
         if(burstActive){
             const bSeed=b.label*3.17+burstCycle*5.13;
-            const bAngle=burstAngle+Math.sin(bSeed)*2.0;
-            const bStr=burstStr*(0.8+Math.random()*0.4);
-            b.vx+=Math.cos(bAngle)*bStr*dt;
-            b.vy+=Math.sin(bAngle)*bStr*dt*0.6-bStr*dt*0.7;
+            const bAng=burstAngle+Math.sin(bSeed)*2;
+            Body.applyForce(b.body,pos,{
+                x:Math.cos(bAng)*burstMag*(0.7+Math.random()*0.6),
+                y:Math.sin(bAng)*burstMag*0.5-burstMag*0.6
+            });
         }
 
-        // 4) Per-ball chaotic turbulence — every ball moves differently
-        const seed=b.label*7.13;
-        b.vx+=Math.sin(t*4.1+seed)*60*dt;
-        b.vy+=Math.cos(t*3.7+seed*1.4)*50*dt;
-        // Random strong kicks
-        if(Math.sin(t*7+seed*2)>0.9){
-            b.vx+=(Math.random()-0.5)*400*dt;
-            b.vy+=(Math.random()-0.5)*350*dt;
+        // 4) Occasional random strong kick
+        if(Math.sin(t*6+seed*2)>0.93){
+            Body.applyForce(b.body,pos,{
+                x:(Math.random()-.5)*0.015,
+                y:(Math.random()-.5)*0.012
+            });
         }
 
-        // 5) Z-axis (depth) — balls constantly shuffle front/back
-        //    Collisions and turbulence push balls between layers
-        b.vz+=(Math.sin(t*3.5+seed*0.7))*6*dt;// oscillate
-        b.vz+=(Math.random()-.5)*8*dt;// random z kicks
-        // Bursts also affect z
-        if(burstActive)b.vz+=(Math.sin(burstCycle*2.1+seed))*10*dt;
-        b.vz*=0.94;// z friction
-        b.z+=b.vz*dt;
+        // 5) Keep balls inside circle (safety - walls should handle this)
+        const dx=pos.x-machineX,dy=pos.y-machineY;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist>machineR-BALL_R-2){
+            const nx=dx/dist,ny=dy/dist;
+            Body.setPosition(b.body,{
+                x:machineX+nx*(machineR-BALL_R-3),
+                y:machineY+ny*(machineR-BALL_R-3)
+            });
+            // Bounce velocity inward
+            const vel=b.body.velocity;
+            const dot=vel.x*nx+vel.y*ny;
+            if(dot>0)Body.setVelocity(b.body,{x:vel.x-1.5*dot*nx,y:vel.y-1.5*dot*ny});
+        }
+
+        // 6) Z-axis depth (visual only, not physics)
+        b.vz+=(Math.sin(t*3+seed*0.7))*4*0.016;
+        b.vz+=(Math.random()-.5)*5*0.016;
+        if(burstActive)b.vz+=(Math.sin(burstCycle*2.1+seed))*6*0.016;
+        b.vz*=0.94;
+        b.z+=b.vz*0.016;
         if(b.z>1){b.z=1;b.vz*=-0.7}
         if(b.z<-1){b.z=-1;b.vz*=-0.7}
+    }
+}
 
-        // 6) Anti-wall-hugging
-        if(normR>0.65){
-            const pushInward=(normR-0.65)*250;
-            b.vx-=(bx/bDist)*pushInward*dt;
-            b.vy-=(by/bDist)*pushInward*dt;
-        }
-
-        b.vx*=FRICTION;b.vy*=FRICTION;
-
-        // Speed limit — higher for more dynamic movement
-        const spd=Math.sqrt(b.vx*b.vx+b.vy*b.vy);
-        if(spd>500){b.vx*=500/spd;b.vy*=500/spd}
-
-        b.x+=b.vx*dt;b.y+=b.vy*dt;
-
-        // Constrain to machine circle
-        const dx=b.x-machineX,dy=b.y-machineY;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        const maxDist=machineR-b.r;
-        if(dist>maxDist){
-            const nx=dx/dist,ny=dy/dist;
-            b.x=machineX+nx*maxDist;b.y=machineY+ny*maxDist;
-            // Reflect velocity
-            const dot=b.vx*nx+b.vy*ny;
-            b.vx-=2*dot*nx*BOUNCE;b.vy-=2*dot*ny*BOUNCE;
-            if(Math.abs(dot)>50)SFX.bounce();
-        }
-
-        // Ball-ball collision
-        for(const o of balls){
-            if(o===b||o.drawn)continue;
-            const bx=b.x-o.x,by=b.y-o.y;
-            const bd=Math.sqrt(bx*bx+by*by);
-            const minD=b.r+o.r;
-            if(bd<minD&&bd>0){
-                const nx=bx/bd,ny=by/bd;
-                const overlap=(minD-bd)/2;
-                b.x+=nx*overlap;b.y+=ny*overlap;
-                o.x-=nx*overlap;o.y-=ny*overlap;
-                const dvx=b.vx-o.vx,dvy=b.vy-o.vy;
-                const dvn=dvx*nx+dvy*ny;
-                if(dvn>0){
-                    b.vx-=dvn*nx*.8;b.vy-=dvn*ny*.8;
-                    o.vx+=dvn*nx*.8;o.vy+=dvn*ny*.8;
-                }
-            }
-        }
+function updateBalls(dt){
+    applyWindForces();
+    Engine.update(engine,dt*1000);// Matter.js uses ms
+    // Sync ball positions from physics bodies
+    for(const b of balls){
+        if(b.drawn||!b.body)continue;
+        b.x=b.body.position.x;
+        b.y=b.body.position.y;
     }
 }
 
@@ -852,34 +863,13 @@ function startSeparatePoolDraw(mainNums,mainColors,mainCount,bonusNums,bonusColo
 }
 
 function transitionToBonusPool(){
-    // Clear all remaining main balls from machine
-    balls.forEach(b=>{b.drawn=true});
+    // Remove all main ball bodies from physics world
+    balls.forEach(b=>{b.drawn=true;if(b.body)Composite.remove(world,b.body)});
     separatePhase=1;
 
-    // Brief pause, then load bonus balls
+    // Brief pause, then load bonus balls using createBalls
     setTimeout(()=>{
-        // Create new bonus balls in the machine
-        const n=pendingBonusNums.length;
-        const newBalls=[];
-        for(let i=0;i<n;i++){
-            const angle=Math.random()*Math.PI*2;
-            const dist=Math.random()*machineR*.7;
-            newBalls.push({
-                x:machineX+Math.cos(angle)*dist,
-                y:machineY+Math.sin(angle)*dist,
-                vx:(Math.random()-.5)*200,
-                vy:(Math.random()-.5)*200,
-                z:Math.random()*2-1,
-                vz:(Math.random()-.5)*3,
-                r:BALL_R,
-                label:pendingBonusNums[i],
-                color:pendingBonusColors[i%pendingBonusColors.length],
-                drawn:false,
-                exitAnim:0
-            });
-        }
-        // Replace balls array with bonus balls
-        balls=newBalls;
+        createBalls(pendingBonusNums,pendingBonusColors);
         separatePhase=2;
 
         // Build bonus draw queue
@@ -916,6 +906,7 @@ function drawNextBall(){
             const b=balls[item.idx];
             if(!b){currentDrawn++;setTimeout(drawNextBall,100);return}
             b.drawn=true;
+            if(b.body)Composite.remove(world,b.body);
             SFX.pop();
             drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,isBonus:item.isBonus});
             drawnResults.push({label:b.label,color:b.color,idx:item.idx,isBonus:item.isBonus});
@@ -986,7 +977,8 @@ function init(){
         document.getElementById('resultScreen').style.display='none';
         document.getElementById('gameScreen').style.display='none';
         document.getElementById('setupWrap').style.display='flex';
-        drawnResults=[];drawnBalls=[];balls=[];
+        drawnResults=[];drawnBalls=[];
+        balls.forEach(b=>{if(b.body)Composite.remove(world,b.body)});balls=[];
     });
 
     window.addEventListener('resize',()=>{if(document.getElementById('gameScreen').style.display==='block')resizeCanvas()});
