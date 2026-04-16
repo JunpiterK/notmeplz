@@ -321,7 +321,7 @@ let canvas,ctx,dpr,W,H,animId;
 let balls=[],drawnBalls=[],drawing=false,drawQueue=[],currentDrawn=0;
 
 // Ball physics
-const GRAVITY=400,BOUNCE=.65,FRICTION=.992,BALL_R=16;
+const GRAVITY=180,BOUNCE=.75,FRICTION=.995,BALL_R=16;
 // Machine dimensions (computed on resize)
 let machineX,machineY,machineR,exitX,exitY,exitR;
 
@@ -366,29 +366,59 @@ function createBalls(labels,colors){
 }
 
 function updateBalls(dt){
-    // Slow rotating wind - simulates real tumbling drum
     const t=performance.now()*.001;
-    // Main circular wind that rotates the whole mass of balls
-    const windAngle=t*.8;// slow rotation ~0.8 rad/s
-    const windStr=60+Math.sin(t*.3)*20;// gentle pulsing strength
-    const windX=Math.cos(windAngle)*windStr;
-    const windY=Math.sin(windAngle)*windStr-40;// slight upward bias
-    // Secondary turbulence for individual ball variation
-    const turbX=Math.sin(t*1.7)*25;
-    const turbY=Math.cos(t*2.1)*20;
+    const n=balls.filter(b=>!b.drawn).length;
+
+    // === BLOWER SIMULATION ===
+    // Strong upward air jet from bottom center (like real lotto machine)
+    // Plus rotating drum effect that pushes balls around the circumference
+
+    // Drum rotation - slow circular push
+    const drumAngle=t*1.2;
+    const drumStr=80+Math.sin(t*.4)*30;
 
     for(const b of balls){
         if(b.drawn)continue;
 
-        // Apply forces
+        const dx=b.x-machineX,dy=b.y-machineY;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const normR=dist/machineR;// 0=center, 1=edge
+
+        // 1) Gravity (light - plastic hollow balls)
         b.vy+=GRAVITY*dt;
-        b.vx+=(windX+turbX*(Math.sin(b.x*.02+t)))*dt;
-        b.vy+=(windY+turbY*(Math.cos(b.y*.02+t)))*dt;
+
+        // 2) Bottom blower: strong upward force, strongest at bottom
+        const verticalPos=(b.y-machineY)/machineR;// -1=top, +1=bottom
+        const blowerStr=Math.max(0,verticalPos+0.2)*250;// stronger when ball is lower
+        b.vy-=blowerStr*dt;
+        // Blower also pushes sideways randomly
+        b.vx+=Math.sin(t*3+b.x*.05)*blowerStr*0.3*dt;
+
+        // 3) Drum rotation: tangential force to spin balls around
+        if(dist>5){
+            const tangX=-dy/dist,tangY=dx/dist;// perpendicular to radius
+            const rotForce=drumStr*(0.3+normR*0.7);// stronger near walls
+            b.vx+=tangX*rotForce*dt;
+            b.vy+=tangY*rotForce*dt;
+        }
+
+        // 4) Per-ball turbulence (air chaotic movement, each ball different)
+        const bSeed=b.label*7.13;// unique per ball
+        b.vx+=Math.sin(t*2.3+bSeed)*40*dt;
+        b.vy+=Math.cos(t*1.9+bSeed*1.3)*35*dt;
+
+        // 5) Center push: prevent balls clumping in center
+        if(dist<machineR*0.15&&dist>0){
+            const pushStr=80*(1-dist/(machineR*0.15));
+            b.vx+=(dx/dist)*pushStr*dt;
+            b.vy+=(dy/dist)*pushStr*dt;
+        }
+
         b.vx*=FRICTION;b.vy*=FRICTION;
 
-        // Speed limit - slower for realism
+        // Speed limit
         const spd=Math.sqrt(b.vx*b.vx+b.vy*b.vy);
-        if(spd>300){b.vx*=300/spd;b.vy*=300/spd}
+        if(spd>350){b.vx*=350/spd;b.vy*=350/spd}
 
         b.x+=b.vx*dt;b.y+=b.vy*dt;
 
