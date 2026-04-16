@@ -146,6 +146,20 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--dark);min-height:100
                 <input type="number" id="drawCount" value="6" min="1" max="20">
                 <span id="ballsText">balls</span>
             </div>
+            <div id="bonusSection" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)">
+                <div style="font-size:.75em;color:rgba(0,217,255,.7);margin-bottom:6px;font-weight:700" id="bonusLabel">⭐ Bonus Ball</div>
+                <div class="num-opt">
+                    <label id="bonusRangeLabel">Range:</label>
+                    <input type="number" id="bonusStart" value="1" min="0" max="999">
+                    <span>~</span>
+                    <input type="number" id="bonusEnd" value="26" min="1" max="999">
+                </div>
+                <div class="num-opt">
+                    <label id="bonusCountLabel">Draw:</label>
+                    <input type="number" id="bonusCount" value="1" min="1" max="5">
+                    <span id="bonusBallsText">balls</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -198,23 +212,24 @@ function T(k,v){let s=(I18N[lang]&&I18N[lang][k])||I18N.en[k]||k;if(v)Object.key
 const BALL_COLORS=['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#e84393','#00bcd4','#ff6b81','#a29bfe','#fd79a8','#00cec9','#fab1a0','#74b9ff','#55efc4','#fdcb6e','#6c5ce7','#ff7675','#636e72'];
 
 /* Country lotto presets: {flag, name, start, end, draw} */
+/* bonus: {start,end,draw} = separate bonus pool (e.g. Powerball, 双色球 blue ball) */
 const LOTTO_PRESETS=[
-    {id:'kr',flag:'\uD83C\uDDF0\uD83C\uDDF7',name:'Lotto 6/45',start:1,end:45,draw:6,langs:['ko']},
-    {id:'us',flag:'\uD83C\uDDFA\uD83C\uDDF8',name:'Powerball',start:1,end:69,draw:5,langs:['en']},
-    {id:'gb',flag:'\uD83C\uDDEC\uD83C\uDDE7',name:'UK Lotto',start:1,end:59,draw:6,langs:['gb']},
-    {id:'jp',flag:'\uD83C\uDDEF\uD83C\uDDF5',name:'Loto 6',start:1,end:43,draw:6,langs:['ja']},
-    {id:'cn',flag:'\uD83C\uDDE8\uD83C\uDDF3',name:'\u53CC\u8272\u7403',start:1,end:33,draw:6,langs:['zh']},
-    {id:'es',flag:'\uD83C\uDDEA\uD83C\uDDF8',name:'La Primitiva',start:1,end:49,draw:6,langs:['es']},
-    {id:'de',flag:'\uD83C\uDDE9\uD83C\uDDEA',name:'Lotto 6/49',start:1,end:49,draw:6,langs:['de']},
-    {id:'fr',flag:'\uD83C\uDDEB\uD83C\uDDF7',name:'Loto',start:1,end:49,draw:5,langs:['fr']},
-    {id:'br',flag:'\uD83C\uDDE7\uD83C\uDDF7',name:'Mega-Sena',start:1,end:60,draw:6,langs:['pt']},
-    {id:'ru',flag:'\uD83C\uDDF7\uD83C\uDDFA',name:'\u0413\u043E\u0441\u043B\u043E\u0442\u043E 6/45',start:1,end:45,draw:6,langs:['ru']},
-    {id:'tr',flag:'\uD83C\uDDF9\uD83C\uDDF7',name:'Say\u0131sal Loto',start:1,end:49,draw:6,langs:['tr']},
-    {id:'th',flag:'\uD83C\uDDF9\uD83C\uDDED',name:'Thai Lottery',start:1,end:99,draw:6,langs:['th']},
-    {id:'vn',flag:'\uD83C\uDDFB\uD83C\uDDF3',name:'Vietlott 6/45',start:1,end:45,draw:6,langs:['vi']},
-    {id:'in',flag:'\uD83C\uDDEE\uD83C\uDDF3',name:'Lotto India',start:1,end:50,draw:6,langs:['hi']},
-    {id:'id',flag:'\uD83C\uDDEE\uD83C\uDDE9',name:'Togel',start:1,end:45,draw:6,langs:['id']},
-    {id:'sa',flag:'\uD83C\uDDF8\uD83C\uDDE6',name:'Emirates Loto',start:1,end:49,draw:6,langs:['ar']}
+    {id:'kr',flag:'🇰🇷',name:'Lotto 6/45',start:1,end:45,draw:6,langs:['ko']},
+    {id:'us',flag:'🇺🇸',name:'Powerball',start:1,end:69,draw:5,bonus:{start:1,end:26,draw:1,label:'Powerball'},langs:['en']},
+    {id:'gb',flag:'🇬🇧',name:'UK Lotto',start:1,end:59,draw:6,langs:['gb']},
+    {id:'jp',flag:'🇯🇵',name:'Loto 6',start:1,end:43,draw:6,langs:['ja']},
+    {id:'cn',flag:'🇨🇳',name:'双色球',start:1,end:33,draw:6,bonus:{start:1,end:16,draw:1,label:'蓝球'},langs:['zh']},
+    {id:'es',flag:'🇪🇸',name:'La Primitiva',start:1,end:49,draw:6,langs:['es']},
+    {id:'de',flag:'🇩🇪',name:'Lotto 6/49',start:1,end:49,draw:6,bonus:{start:0,end:9,draw:1,label:'Superzahl'},langs:['de']},
+    {id:'fr',flag:'🇫🇷',name:'Loto',start:1,end:49,draw:5,bonus:{start:1,end:10,draw:1,label:'Chance'},langs:['fr']},
+    {id:'br',flag:'🇧🇷',name:'Mega-Sena',start:1,end:60,draw:6,langs:['pt']},
+    {id:'ru',flag:'🇷🇺',name:'Гослото 6/45',start:1,end:45,draw:6,langs:['ru']},
+    {id:'tr',flag:'🇹🇷',name:'Sayısal Loto',start:1,end:49,draw:6,langs:['tr']},
+    {id:'th',flag:'🇹🇭',name:'Thai Lottery',start:1,end:99,draw:6,langs:['th']},
+    {id:'vn',flag:'🇻🇳',name:'Vietlott 6/45',start:1,end:45,draw:6,langs:['vi']},
+    {id:'in',flag:'🇮🇳',name:'Lotto India',start:1,end:50,draw:6,langs:['hi']},
+    {id:'id',flag:'🇮🇩',name:'Togel',start:1,end:45,draw:6,langs:['id']},
+    {id:'sa',flag:'🇸🇦',name:'Emirates Loto',start:1,end:49,draw:6,langs:['ar']}
 ];
 
 let drawnResults=[];
@@ -273,6 +288,16 @@ function applyLottoPreset(preset){
     document.getElementById('numStart').value=preset.start;
     document.getElementById('numEnd').value=preset.end;
     document.getElementById('drawCount').value=preset.draw;
+    const bs=document.getElementById('bonusSection');
+    if(preset.bonus){
+        bs.style.display='block';
+        document.getElementById('bonusStart').value=preset.bonus.start;
+        document.getElementById('bonusEnd').value=preset.bonus.end;
+        document.getElementById('bonusCount').value=preset.bonus.draw;
+        document.getElementById('bonusLabel').textContent='⭐ '+(preset.bonus.label||'Bonus Ball');
+    }else{
+        bs.style.display='none';
+    }
 }
 
 /* ============================================
@@ -591,41 +616,6 @@ function drawDrawnBalls(){
 }
 
 /* Draw sequence */
-function startDrawSequence(labels,colors,count){
-    drawnBalls=[];currentDrawn=0;drawing=true;
-    drawQueue=[];
-    // Pick random indices
-    const indices=[...Array(labels.length).keys()];
-    for(let i=indices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indices[i],indices[j]]=[indices[j],indices[i]]}
-    for(let i=0;i<Math.min(count,labels.length);i++)drawQueue.push(indices[i]);
-    // Schedule draws
-    drawNext();
-}
-
-function drawNext(){
-    if(currentDrawn>=drawQueue.length){
-        drawing=false;gateOpen=false;
-        setTimeout(()=>{SFX.fanfare();setTimeout(showResult,1500)},500);
-        return;
-    }
-    const idx=drawQueue[currentDrawn];
-    // Open gate -> draw ball -> close gate
-    gateOpen=true;
-    setTimeout(()=>{
-        const b=balls[idx];
-        b.drawn=true;
-        SFX.pop();
-        drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY});
-        drawnResults.push({label:b.label,color:b.color,idx});
-        currentDrawn++;
-        // Close gate after ball exits
-        setTimeout(()=>{
-            gateOpen=false;
-            setTimeout(drawNext,600);
-        },500);
-    },600+Math.random()*300);
-}
-
 /* Main loop */
 let lastTime=0;
 function loop(ts){
@@ -673,6 +663,8 @@ function loop(ts){
 /* ============================================
    LOTTO NUMBER DRAW
 ============================================ */
+let bonusConfig=null;// {start,end,draw,label} or null
+
 function startLottoDraw(){
     const start=parseInt(document.getElementById('numStart').value)||1;
     const end=parseInt(document.getElementById('numEnd').value)||45;
@@ -680,16 +672,81 @@ function startLottoDraw(){
     const range=Math.max(end,start)-Math.min(end,start)+1;
     const lo=Math.min(start,end);
 
+    // Check for bonus balls
+    const bs=document.getElementById('bonusSection');
+    if(bs.style.display!=='none'){
+        const bStart=parseInt(document.getElementById('bonusStart').value)||1;
+        const bEnd=parseInt(document.getElementById('bonusEnd').value)||26;
+        const bCount=parseInt(document.getElementById('bonusCount').value)||1;
+        bonusConfig={start:Math.min(bStart,bEnd),end:Math.max(bStart,bEnd),draw:bCount,label:document.getElementById('bonusLabel').textContent.replace('⭐ ','')};
+    }else{
+        bonusConfig=null;
+    }
+
+    // Main pool balls
     const allNums=[];for(let i=0;i<range;i++)allNums.push(lo+i);
-    const colors=allNums.map((_,i)=>BALL_COLORS[i%BALL_COLORS.length]);
+    const mainColors=allNums.map((_,i)=>BALL_COLORS[i%BALL_COLORS.length]);
+
+    // Bonus pool balls (different color - gold/blue)
+    const bonusNums=[];const bonusColors=[];
+    if(bonusConfig){
+        const bRange=bonusConfig.end-bonusConfig.start+1;
+        for(let i=0;i<bRange;i++){bonusNums.push(bonusConfig.start+i);bonusColors.push('#2980b9')}
+    }
+
+    // Combine all balls into machine
+    const allLabels=[...allNums,...bonusNums];
+    const allColors=[...mainColors,...bonusColors];
 
     document.getElementById('setupWrap').style.display='none';
     document.getElementById('gameScreen').style.display='block';
     initCanvas();
-    createBalls(allNums,colors);
+    createBalls(allLabels,allColors);
     drawnResults=[];drawnBalls=[];
     lastTime=0;animId=requestAnimationFrame(loop);
-    startDrawSequence(allNums,colors,Math.min(count,range));
+
+    // Draw main balls first, then bonus balls
+    startDrawSequenceWithBonus(allNums,mainColors,count,bonusNums,bonusColors,bonusConfig?bonusConfig.draw:0);
+}
+
+function startDrawSequenceWithBonus(mainNums,mainColors,mainCount,bonusNums,bonusColors,bonusCount){
+    drawnBalls=[];currentDrawn=0;drawing=true;
+    drawQueue=[];
+
+    // Main pool: pick from first mainNums.length balls
+    const mainIndices=[...Array(mainNums.length).keys()];
+    for(let i=mainIndices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[mainIndices[i],mainIndices[j]]=[mainIndices[j],mainIndices[i]]}
+    for(let i=0;i<Math.min(mainCount,mainNums.length);i++)drawQueue.push({idx:mainIndices[i],isBonus:false});
+
+    // Bonus pool: pick from bonusNums (indices offset by mainNums.length)
+    if(bonusCount>0&&bonusNums.length>0){
+        const bonusIndices=[...Array(bonusNums.length).keys()].map(i=>i+mainNums.length);
+        for(let i=bonusIndices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bonusIndices[i],bonusIndices[j]]=[bonusIndices[j],bonusIndices[i]]}
+        for(let i=0;i<Math.min(bonusCount,bonusNums.length);i++)drawQueue.push({idx:bonusIndices[i],isBonus:true});
+    }
+
+    totalMainCount=mainCount;
+    drawNextBall();
+}
+let totalMainCount=0;
+
+function drawNextBall(){
+    if(currentDrawn>=drawQueue.length){
+        drawing=false;gateOpen=false;
+        setTimeout(()=>{SFX.fanfare();setTimeout(showResult,1500)},500);
+        return;
+    }
+    const item=drawQueue[currentDrawn];
+    gateOpen=true;
+    setTimeout(()=>{
+        const b=balls[item.idx];
+        b.drawn=true;
+        SFX.pop();
+        drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,isBonus:item.isBonus});
+        drawnResults.push({label:b.label,color:b.color,idx:item.idx,isBonus:item.isBonus});
+        currentDrawn++;
+        setTimeout(()=>{gateOpen=false;setTimeout(drawNextBall,600)},500);
+    },600+Math.random()*300);
 }
 
 /* Result */
@@ -701,9 +758,20 @@ function showResult(){
     startConfetti();SFX.fanfare();
 
     const rc=document.getElementById('resultContent');
-    const sorted=[...drawnResults].sort((a,b)=>a.label-b.label);
-    rc.innerHTML=`<div class="drawn-balls">${sorted.map(b=>`<div class="drawn-ball" style="background:${b.color}">${b.label}</div>`).join('')}</div>`;
-    buildShareBtns('Numbers: '+sorted.map(b=>b.label).join(', '));
+    const mainBalls=[...drawnResults].filter(b=>!b.isBonus).sort((a,b)=>a.label-b.label);
+    const bonusBalls=[...drawnResults].filter(b=>b.isBonus).sort((a,b)=>a.label-b.label);
+    let html=`<div class="drawn-balls">${mainBalls.map(b=>`<div class="drawn-ball" style="background:${b.color}">${b.label}</div>`).join('')}`;
+    if(bonusBalls.length>0){
+        html+=`<span style="font-size:1.5em;color:var(--accent);display:flex;align-items:center;margin:0 4px">+</span>`;
+        html+=bonusBalls.map(b=>`<div class="drawn-ball" style="background:#2980b9;box-shadow:0 0 15px rgba(41,128,185,.5)">${b.label}</div>`).join('');
+    }
+    html+=`</div>`;
+    if(bonusConfig){
+        html+=`<div style="font-size:.75em;color:rgba(255,255,255,.4);margin-top:6px">${bonusConfig.label}: ${bonusBalls.map(b=>b.label).join(', ')}</div>`;
+    }
+    rc.innerHTML=html;
+    const shareNums=mainBalls.map(b=>b.label).join(', ')+(bonusBalls.length?' + '+bonusBalls.map(b=>b.label).join(', '):'');
+    buildShareBtns('Numbers: '+shareNums);
 }
 
 function buildShareBtns(text){
