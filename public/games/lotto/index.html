@@ -321,7 +321,7 @@ let canvas,ctx,dpr,W,H,animId;
 let balls=[],drawnBalls=[],drawing=false,drawQueue=[],currentDrawn=0;
 
 // Ball physics
-const GRAVITY=600,BOUNCE=.7,FRICTION=.99,BALL_R=18;
+const GRAVITY=400,BOUNCE=.65,FRICTION=.992,BALL_R=16;
 // Machine dimensions (computed on resize)
 let machineX,machineY,machineR,exitX,exitY,exitR;
 
@@ -335,8 +335,8 @@ function resizeCanvas(){
     canvas.width=W*dpr;canvas.height=H*dpr;
     canvas.style.width=W+'px';canvas.style.height=H+'px';
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    machineR=Math.min(W*.35,H*.28,160);
-    machineX=W/2;machineY=H*.32;
+    machineR=Math.min(W*.42,H*.33,220);
+    machineX=W/2;machineY=H*.35;
     // Gate at bottom center of globe
     exitX=machineX;exitY=machineY+machineR+BALL_R+8;exitR=BALL_R+4;
     // Tray position (wooden rack below gate)
@@ -350,12 +350,12 @@ function createBalls(labels,colors){
     const n=labels.length;
     for(let i=0;i<n;i++){
         const angle=Math.random()*Math.PI*2;
-        const dist=Math.random()*machineR*.5;
+        const dist=Math.random()*machineR*.75;// wider spread
         balls.push({
             x:machineX+Math.cos(angle)*dist,
             y:machineY+Math.sin(angle)*dist,
-            vx:(Math.random()-.5)*200,
-            vy:(Math.random()-.5)*200,
+            vx:(Math.random()-.5)*120,// slower initial velocity
+            vy:(Math.random()-.5)*120,
             r:BALL_R,
             label:labels[i],
             color:colors[i%colors.length],
@@ -366,23 +366,29 @@ function createBalls(labels,colors){
 }
 
 function updateBalls(dt){
-    // Wind force (simulates blower)
-    const windPhase=performance.now()*.003;
-    const windX=Math.sin(windPhase)*120;
-    const windY=Math.cos(windPhase*1.3)*100-80;// upward bias
+    // Slow rotating wind - simulates real tumbling drum
+    const t=performance.now()*.001;
+    // Main circular wind that rotates the whole mass of balls
+    const windAngle=t*.8;// slow rotation ~0.8 rad/s
+    const windStr=60+Math.sin(t*.3)*20;// gentle pulsing strength
+    const windX=Math.cos(windAngle)*windStr;
+    const windY=Math.sin(windAngle)*windStr-40;// slight upward bias
+    // Secondary turbulence for individual ball variation
+    const turbX=Math.sin(t*1.7)*25;
+    const turbY=Math.cos(t*2.1)*20;
 
     for(const b of balls){
         if(b.drawn)continue;
 
         // Apply forces
         b.vy+=GRAVITY*dt;
-        b.vx+=windX*dt;
-        b.vy+=windY*dt;
+        b.vx+=(windX+turbX*(Math.sin(b.x*.02+t)))*dt;
+        b.vy+=(windY+turbY*(Math.cos(b.y*.02+t)))*dt;
         b.vx*=FRICTION;b.vy*=FRICTION;
 
-        // Speed limit
+        // Speed limit - slower for realism
         const spd=Math.sqrt(b.vx*b.vx+b.vy*b.vy);
-        if(spd>500){b.vx*=500/spd;b.vy*=500/spd}
+        if(spd>300){b.vx*=300/spd;b.vy*=300/spd}
 
         b.x+=b.vx*dt;b.y+=b.vy*dt;
 
@@ -792,12 +798,12 @@ function transitionToBonusPool(){
         const newBalls=[];
         for(let i=0;i<n;i++){
             const angle=Math.random()*Math.PI*2;
-            const dist=Math.random()*machineR*.4;
+            const dist=Math.random()*machineR*.7;
             newBalls.push({
                 x:machineX+Math.cos(angle)*dist,
                 y:machineY+Math.sin(angle)*dist,
-                vx:(Math.random()-.5)*200,
-                vy:(Math.random()-.5)*200,
+                vx:(Math.random()-.5)*100,
+                vy:(Math.random()-.5)*100,
                 r:BALL_R,
                 label:pendingBonusNums[i],
                 color:pendingBonusColors[i%pendingBonusColors.length],
@@ -834,17 +840,22 @@ function drawNextBall(){
         return;
     }
     const item=drawQueue[currentDrawn];
-    gateOpen=true;
+    // Rolling time: 6s for main, 10s for bonus (more suspense)
+    const rollTime=item.isBonus?9000+Math.random()*2000:5000+Math.random()*2000;
+    // Show "rolling" state, then open gate near end
     setTimeout(()=>{
-        const b=balls[item.idx];
-        if(!b){currentDrawn++;setTimeout(drawNextBall,100);return}
-        b.drawn=true;
-        SFX.pop();
-        drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,isBonus:item.isBonus});
-        drawnResults.push({label:b.label,color:b.color,idx:item.idx,isBonus:item.isBonus});
-        currentDrawn++;
-        setTimeout(()=>{gateOpen=false;setTimeout(drawNextBall,600)},500);
-    },600+Math.random()*300);
+        gateOpen=true;
+        setTimeout(()=>{
+            const b=balls[item.idx];
+            if(!b){currentDrawn++;setTimeout(drawNextBall,100);return}
+            b.drawn=true;
+            SFX.pop();
+            drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,isBonus:item.isBonus});
+            drawnResults.push({label:b.label,color:b.color,idx:item.idx,isBonus:item.isBonus});
+            currentDrawn++;
+            setTimeout(()=>{gateOpen=false;setTimeout(drawNextBall,800)},600);
+        },800+Math.random()*400);
+    },rollTime);
 }
 
 /* Result */
