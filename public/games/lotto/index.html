@@ -380,9 +380,9 @@ function updateBalls(dt){
     for(const b of balls){
         if(b.drawn)continue;
 
-        const dx=b.x-machineX,dy=b.y-machineY;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        const normR=dist/machineR;// 0=center, 1=edge
+        const bx=b.x-machineX,by=b.y-machineY;
+        const bDist=Math.sqrt(bx*bx+by*by);
+        const normR=bDist/machineR;// 0=center, 1=edge
 
         // 1) Gravity (light - plastic hollow balls)
         b.vy+=GRAVITY*dt;
@@ -395,8 +395,8 @@ function updateBalls(dt){
         b.vx+=Math.sin(t*3+b.x*.05)*blowerStr*0.3*dt;
 
         // 3) Drum rotation: tangential force to spin balls around
-        if(dist>5){
-            const tangX=-dy/dist,tangY=dx/dist;// perpendicular to radius
+        if(bDist>5){
+            const tangX=-by/bDist,tangY=bx/bDist;// perpendicular to radius
             const rotForce=drumStr*(0.3+normR*0.7);// stronger near walls
             b.vx+=tangX*rotForce*dt;
             b.vy+=tangY*rotForce*dt;
@@ -408,10 +408,10 @@ function updateBalls(dt){
         b.vy+=Math.cos(t*1.9+bSeed*1.3)*35*dt;
 
         // 5) Center push: prevent balls clumping in center
-        if(dist<machineR*0.15&&dist>0){
-            const pushStr=80*(1-dist/(machineR*0.15));
-            b.vx+=(dx/dist)*pushStr*dt;
-            b.vy+=(dy/dist)*pushStr*dt;
+        if(bDist<machineR*0.15&&bDist>0){
+            const pushStr=80*(1-bDist/(machineR*0.15));
+            b.vx+=(bx/bDist)*pushStr*dt;
+            b.vy+=(by/bDist)*pushStr*dt;
         }
 
         b.vx*=FRICTION;b.vy*=FRICTION;
