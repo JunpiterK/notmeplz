@@ -721,44 +721,114 @@ function startLottoDraw(){
         for(let i=0;i<bRange;i++){bonusNums.push(bonusConfig.start+i);bonusColors.push(bonusClr)}
     }
 
-    // Combine all balls into machine
-    const allLabels=[...allNums,...bonusNums];
-    const allColors=[...mainColors,...bonusColors];
-
     document.getElementById('setupWrap').style.display='none';
     document.getElementById('gameScreen').style.display='block';
     initCanvas();
-    createBalls(allLabels,allColors);
     drawnResults=[];drawnBalls=[];
-    lastTime=0;animId=requestAnimationFrame(loop);
 
-    // Draw main balls first, then bonus balls
-    startDrawSequenceWithBonus(allNums,mainColors,count,bonusNums,bonusColors,bonusConfig?bonusConfig.draw:0);
+    // Check if this is a separate-pool preset (like China 双色球)
+    const isSeparatePool=activePreset&&activePreset.id==='cn'&&bonusConfig;
+
+    if(isSeparatePool){
+        // PHASE 1: Load main (red) balls only
+        createBalls(allNums,mainColors);
+        lastTime=0;animId=requestAnimationFrame(loop);
+        startSeparatePoolDraw(allNums,mainColors,count,bonusNums,bonusColors,bonusConfig.draw);
+    }else{
+        // Standard: all balls in one machine
+        const allLabels=[...allNums,...bonusNums];
+        const allColors=[...mainColors,...bonusColors];
+        createBalls(allLabels,allColors);
+        lastTime=0;animId=requestAnimationFrame(loop);
+        startStandardDraw(allNums.length,count,bonusNums.length,bonusConfig?bonusConfig.draw:0);
+    }
 }
 
-function startDrawSequenceWithBonus(mainNums,mainColors,mainCount,bonusNums,bonusColors,bonusCount){
+/* === Standard draw (single machine, all balls together) === */
+function startStandardDraw(mainPoolSize,mainCount,bonusPoolSize,bonusCount){
     drawnBalls=[];currentDrawn=0;drawing=true;
     drawQueue=[];
-
-    // Main pool: pick from first mainNums.length balls
-    const mainIndices=[...Array(mainNums.length).keys()];
+    const mainIndices=[...Array(mainPoolSize).keys()];
     for(let i=mainIndices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[mainIndices[i],mainIndices[j]]=[mainIndices[j],mainIndices[i]]}
-    for(let i=0;i<Math.min(mainCount,mainNums.length);i++)drawQueue.push({idx:mainIndices[i],isBonus:false});
-
-    // Bonus pool: pick from bonusNums (indices offset by mainNums.length)
-    if(bonusCount>0&&bonusNums.length>0){
-        const bonusIndices=[...Array(bonusNums.length).keys()].map(i=>i+mainNums.length);
+    for(let i=0;i<Math.min(mainCount,mainPoolSize);i++)drawQueue.push({idx:mainIndices[i],isBonus:false});
+    if(bonusCount>0&&bonusPoolSize>0){
+        const bonusIndices=[...Array(bonusPoolSize).keys()].map(i=>i+mainPoolSize);
         for(let i=bonusIndices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bonusIndices[i],bonusIndices[j]]=[bonusIndices[j],bonusIndices[i]]}
-        for(let i=0;i<Math.min(bonusCount,bonusNums.length);i++)drawQueue.push({idx:bonusIndices[i],isBonus:true});
+        for(let i=0;i<Math.min(bonusCount,bonusPoolSize);i++)drawQueue.push({idx:bonusIndices[i],isBonus:true});
     }
-
     totalMainCount=mainCount;
     drawNextBall();
 }
 let totalMainCount=0;
 
+/* === Separate pool draw (China 双色球 style: red machine → blue machine) === */
+let separatePhase=0;// 0=main, 1=transition, 2=bonus
+let pendingBonusNums=[],pendingBonusColors=[],pendingBonusCount=0;
+
+function startSeparatePoolDraw(mainNums,mainColors,mainCount,bonusNums,bonusColors,bonusCount){
+    separatePhase=0;
+    pendingBonusNums=bonusNums;
+    pendingBonusColors=bonusColors;
+    pendingBonusCount=bonusCount;
+    drawnBalls=[];currentDrawn=0;drawing=true;
+    drawQueue=[];
+    // Phase 1: draw from red balls
+    const mainIndices=[...Array(mainNums.length).keys()];
+    for(let i=mainIndices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[mainIndices[i],mainIndices[j]]=[mainIndices[j],mainIndices[i]]}
+    for(let i=0;i<Math.min(mainCount,mainNums.length);i++)drawQueue.push({idx:mainIndices[i],isBonus:false});
+    totalMainCount=mainCount;
+    drawNextBall();
+}
+
+function transitionToBonusPool(){
+    // Clear all remaining main balls from machine
+    balls.forEach(b=>{b.drawn=true});
+    separatePhase=1;
+
+    // Brief pause, then load bonus balls
+    setTimeout(()=>{
+        // Create new bonus balls in the machine
+        const n=pendingBonusNums.length;
+        const newBalls=[];
+        for(let i=0;i<n;i++){
+            const angle=Math.random()*Math.PI*2;
+            const dist=Math.random()*machineR*.4;
+            newBalls.push({
+                x:machineX+Math.cos(angle)*dist,
+                y:machineY+Math.sin(angle)*dist,
+                vx:(Math.random()-.5)*200,
+                vy:(Math.random()-.5)*200,
+                r:BALL_R,
+                label:pendingBonusNums[i],
+                color:pendingBonusColors[i%pendingBonusColors.length],
+                drawn:false,
+                exitAnim:0
+            });
+        }
+        // Replace balls array with bonus balls
+        balls=newBalls;
+        separatePhase=2;
+
+        // Build bonus draw queue
+        const bonusIndices=[...Array(n).keys()];
+        for(let i=bonusIndices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bonusIndices[i],bonusIndices[j]]=[bonusIndices[j],bonusIndices[i]]}
+        // Append to drawQueue
+        const prevLen=drawQueue.length;
+        for(let i=0;i<Math.min(pendingBonusCount,n);i++)drawQueue.push({idx:bonusIndices[i],isBonus:true});
+
+        // Continue drawing
+        setTimeout(drawNextBall,800);
+    },1200);
+}
+
 function drawNextBall(){
     if(currentDrawn>=drawQueue.length){
+        // Check if we need to transition to bonus pool
+        if(separatePhase===0&&pendingBonusCount>0){
+            gateOpen=false;
+            transitionToBonusPool();
+            return;
+        }
         drawing=false;gateOpen=false;
         setTimeout(()=>{SFX.fanfare();setTimeout(showResult,1500)},500);
         return;
@@ -767,6 +837,7 @@ function drawNextBall(){
     gateOpen=true;
     setTimeout(()=>{
         const b=balls[item.idx];
+        if(!b){currentDrawn++;setTimeout(drawNextBall,100);return}
         b.drawn=true;
         SFX.pop();
         drawnBalls.push({label:b.label,color:b.color,exitAnim:0,dispX:exitX,dispY:exitY,isBonus:item.isBonus});
